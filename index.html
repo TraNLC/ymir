@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hướng dẫn sử dụng Tool ONE - YMIR</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-top: 80px; /* Space for fixed header */
+    }
+    /* Anti-copy basics */
+    body, .container, .card, .description-wrapper, .image-title, h1, h2, h3, h4, p, li {
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    img {
+      -webkit-user-drag: none;
+      user-drag: none;
+      pointer-events: none;
+    }
+    /* Disable printing */
+    @media print {
+      body { display: none !important; }
+    }
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: var(--panel);
+      border-bottom: 2px solid var(--border);
+      padding: 16px 24px;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+    h2 {
+      margin: 32px 0 16px;
+      font-size: 22px;
+      color: var(--accent);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 8px;
+    }
+    h3 {
+      margin: 20px 0 10px;
+      font-size: 18px;
+      color: var(--accent);
+    }
+    h4 {
+      margin: 16px 0 8px;
+      font-size: 16px;
+      color: #cbd5e1;
+    }
+    p {
+      color: #cbd5e1;
+      margin: 8px 0;
+    }
+    .intro {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 24px 0;
+      border-bottom: 2px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .nav-tab {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 16px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.3s;
+    }
+    .nav-tab:hover {
+      color: var(--accent);
+    }
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .sub-nav-tabs {
+      display: flex;
+      gap: 6px;
+      margin: 20px 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .sub-nav-tab {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.3s;
+    }
+    .sub-nav-tab:hover {
+      color: var(--accent);
+    }
+    .sub-nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    .image-section {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+    .image-wrapper {
+      flex: 0 0 45%;
+      min-width: 300px;
+      position: sticky;
+      top: 100px;
+      align-self: flex-start;
+    }
+    .image-wrapper img {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      display: block;
+    }
+    .image-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .description-wrapper {
+      flex: 1;
+      min-width: 0;
+    }
+    ul, ol {
+      margin: 8px 0 0 24px;
+      color: #cbd5e1;
+    }
+    li {
+      margin: 8px 0;
+      line-height: 1.7;
+    }
+    b {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .highlight {
+      background: rgba(56, 189, 248, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+    .note {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--success);
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+    }
+    .warning {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 3px solid #f59e0b;
+      padding: 12px 16px;
+      margin: 16px 0;
+      border-radius: 4px;
+    }
+    /* Scroll to Top Button */
+    .scroll-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: all 0.3s;
+    }
+    .scroll-to-top:hover {
+      background: var(--accent-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+    .scroll-to-top.show {
+      display: flex;
+    }
+
+    
+
+    /* Responsive */
+    @media (max-width: 968px) {
+      .image-section {
+        flex-direction: column;
+      }
+      .image-wrapper {
+        flex: 1;
+        position: static;
+        min-width: 100%;
+      }
+      body {
+        padding-top: 70px;
+      }
+      .header h1 {
+        font-size: 20px;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .scroll-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📖 Hướng dẫn sử dụng Tool ONE - YMIR</h1>
+  </div>
+  <button class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()" title="Lên đầu trang">↑</button>
+
+  <div class="container">
+   
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showMainTab('preview')">📸 Preview - Giao Diện</button>
+      <button class="nav-tab" onclick="showMainTab('detail')">⚙️ Detail - Cấu Hình</button>
+    </div>
+
+    <!-- PHẦN PREVIEW -->
+    <div id="preview" class="tab-content active">
+    <h2>📸 Preview - Giao Diện Chính</h2>
+    <p style="margin-bottom: 24px;">Phần này giải thích các màn hình giao diện chính của Tool, giúp bạn làm quen với layout và các thành phần cơ bản.</p>
+
+    <!-- Preview 1 -->
+    <div class="card image-section">
+      <div class="image-wrapper">
+        <div class="image-title">Ảnh 1: Giao diện chính - Main Interface</div>
+        <img src="GUI/Preview/1.png" alt="Giao diện chính">
+      </div>
+      <div class="description-wrapper">
+        <h3>1. Bảng Danh Sách Tài Khoản (Account List Table)</h3>
+        <p>Bảng hiển thị thông tin chi tiết của các tài khoản đang được quản lý:</p>
+        <ul>
+          <li><b>☑ (Checkbox)</b>: Đánh dấu để chọn tài khoản (có thể chọn nhiều dòng)</li>
+          <li><b>ID</b>: Số thứ tự của tài khoản (1, 2, 3...)</li>
+          <li><b>当前执行账号</b> → <b>Tài khoản hiện hành</b>: Tên hoặc ID của tài khoản đang hoạt động (ví dụ: "aoanhtrang.2...")</li>
+          <li><b>任务状态</b> → <b>Trạng thái nhiệm vụ</b>: Trạng thái nhiệm vụ hiện tại (ví dụ: "自动单点挂机中" - Tự động treo máy một điểm)</li>
+          <li><b>工作状态</b> → <b>Trạng thái làm việc</b>: Trạng thái hoạt động chung
+            <ul>
+              <li><b>正在运行</b> → <b>Đang chạy</b></li>
+              <li><b>已暂停</b> → <b>Đã tạm dừng</b></li>
+              <li><b>已停止</b> → <b>Đã dừng</b></li>
+            </ul>
+          </li>
+          <li><b>大区</b> → <b>Đại khu</b>: Khu vực máy chủ game (ví dụ: "4_11004...")</li>
+          <li><b>等级</b> → <b>Cấp độ</b>: Cấp độ của nhân vật (ví dụ: "31")</li>
+          <li><b>战力</b> → <b>Chiến lực</b>: Lực chiến của nhân vật (ví dụ: "36346")</li>
+          <li><b>皮肤</b> → <b>Trang phục</b>: Màu sắc hoặc loại skin (ví dụ: "红" - Đỏ)</li>
+          <li><b>宠物</b> → <b>Thú cưng</b>: Màu sắc hoặc loại pet (ví dụ: "蓝" - Xanh)</li>
+          <li><b>钻石(总计:157)</b> → <b>Kim cương (Tổng:157)</b>: Số lượng kim cương hiện có (ví dụ: "157")</li>
+          <li><b>琥珀</b> → <b>Hổ phách</b>: Số lượng Hổ phách (ví dụ: "42965")</li>
+          <li><b>银币</b> → <b>Bạc</b>: Số lượng bạc (ví dụ: "727000")</li>
+        </ul>
+
+        <h3>2. Bảng Điều Khiển (Control Panel)</h3>
+        <p>Phần điều khiển nằm bên dưới, chia thành 2 khu vực:</p>
+        
+        <h4>2.1. Phần "启动脚本前操作" (Operations before starting script)</h4>
+        <ul>
+          <li><b>窗口布局</b> → <b>Bố cục cửa sổ</b>: Dropdown để chọn cách sắp xếp cửa sổ game
+            <ul>
+              <li>Ví dụ: "2x2" (2 hàng x 2 cột), "3x3", "4x4"...</li>
+            </ul>
+          </li>
+          <li><b>自动上号模式</b> → <b>Chế độ tự đăng nhập</b>: Dropdown để chọn chế độ đăng nhập tự động
+            <ul>
+              <li><b>正常模式</b> → <b>Chế độ bình thường</b></li>
+              <li>Các chế độ khác tùy theo cấu hình</li>
+          </ul>
+        </li>
+          <li><b>游戏路径</b> → <b>Đường dẫn game</b>: Trường hiển thị/nhập đường dẫn cài đặt game (ví dụ: "C:\Wemade\LegendOfYmirG")</li>
+          <li><b>版本可更新</b> → <b>Phiên bản có thể cập nhật</b>: Nút để kiểm tra và cập nhật phiên bản mới</li>
+          <li><b>添加任务</b> → <b>Thêm nhiệm vụ</b>: Nút để thêm một nhiệm vụ mới vào dòng đang được chọn</li>
+        </ul>
+
+        <h4>2.2. Các Nút Điều Khiển Hành Động (Action Buttons)</h4>
+        <ul>
+          <li><b>启动选中</b> → <b>Khởi động đã chọn</b>: Khởi động các tài khoản đã được tick/chọn</li>
+          <li><b>暂停选中</b> → <b>Tạm dừng đã chọn</b>: Tạm dừng các tài khoản đã được tick/chọn</li>
+          <li><b>停止选中</b> → <b>Dừng đã chọn</b>: Dừng hoàn toàn các tài khoản đã được tick/chọn</li>
+          <li><b>恢复选中</b> → <b>Tiếp tục đã chọn</b>: Tiếp tục hoạt động các tài khoản đã tạm dừng (đã được tick)</li>
+          <li><b>启动全部</b> → <b>Khởi động tất cả</b>: Khởi động tất cả các tài khoản trong danh sách</li>
+          <li><b>暂停全部</b> → <b>Tạm dừng tất cả</b>: Tạm dừng tất cả các tài khoản trong danh sách</li>
+          <li><b>停止全部</b> → <b>Dừng tất cả</b>: Dừng hoàn toàn tất cả các tài khoản trong danh sách</li>
+          <li><b>恢复全部</b> → <b>Tiếp tục tất cả</b>: Tiếp tục hoạt động tất cả các tài khoản đã tạm dừng</li>
+        </ul>
+
+        <div class="note">
+          <b>💡 Lưu ý:</b> 
+          <ul>
+            <li>Các nút <span class="highlight">选中</span> chỉ tác động lên các dòng đã được tick checkbox</li>
+            <li>Các nút <span class="highlight">全部</span> tác động lên toàn bộ danh sách, không cần tick</li>
+            <li>Trước khi chạy, cần thiết lập <span class="highlight">游戏路径</span> và thêm <span class="highlight">任务</span> cho các dòng</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview 2 -->
+    <div class="card image-section">
+      <div class="image-wrapper">
+        <div class="image-title">Ảnh 2: Menu 菜单 (Menu) - Chi Tiết</div>
+        <img src="GUI/Preview/2.png" alt="Menu 菜单">
+      </div>
+      <div class="description-wrapper">
+        <h3>Giải thích Menu 菜单 (Menu):</h3>
+        <p>Menu <span class="highlight">菜单</span> chứa các tùy chọn chung của ứng dụng, bao gồm:</p>
+        <ul>
+          <li><b>清理日志</b> → <b>Dọn nhật ký</b>
+            <ul>
+              <li>Xóa các file log và nhật ký hoạt động của tool</li>
+              <li>Giúp giải phóng dung lượng và làm sạch thư mục log</li>
+              <li>Không ảnh hưởng đến dữ liệu tài khoản hay cấu hình</li>
+            </ul>
+          </li>
+          <li><b>窗口整理</b> → <b>Sắp xếp cửa sổ</b>
+            <ul>
+              <li>Sắp xếp và thu gọn các cửa sổ game đang mở</li>
+              <li>Điều chỉnh vị trí và kích thước cửa sổ theo bố cục đã chọn</li>
+              <li>Hữu ích khi cửa sổ bị lộn xộn hoặc nằm ngoài màn hình</li>
+            </ul>
+          </li>
+          <li><b>同步配置</b> → <b>Đồng bộ cấu hình</b>
+            <ul>
+              <li>Áp dụng cấu hình từ một tài khoản cho tất cả tài khoản khác</li>
+              <li>Đồng bộ thiết lập nhiệm vụ, proxy, và các cấu hình khác</li>
+              <li>Tiết kiệm thời gian khi cần cấu hình nhiều tài khoản giống nhau</li>
+            </ul>
+          </li>
+          <li><b>重载大区</b> → <b>Nạp lại đại khu</b>
+            <ul>
+              <li>Làm mới danh sách máy chủ/khu vực game</li>
+              <li>Cập nhật thông tin máy chủ mới nhất từ server</li>
+              <li>Sử dụng khi danh sách máy chủ không hiển thị đầy đủ</li>
+            </ul>
+          </li>
+          <li><b>全局配置</b> → <b>Cấu hình toàn cục</b>
+            <ul>
+              <li>Mở cửa sổ cấu hình chung cho toàn bộ tool</li>
+              <li>Thiết lập các thông số mặc định, đường dẫn, và tùy chọn hệ thống</li>
+              <li>Ảnh hưởng đến tất cả tài khoản và hoạt động của tool</li>
+            </ul>
+          </li>
+        </ul>
+        <div class="note">
+          <b>💡 Lưu ý:</b> Các tùy chọn trong menu <span class="highlight">菜单</span> chủ yếu ảnh hưởng đến cấu hình và quản lý tool, không trực tiếp thay đổi trạng thái tài khoản đang chạy.
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview 3 -->
+    <div class="card image-section">
+      <div class="image-wrapper">
+        <div class="image-title">Ảnh 3: Menu 代理 (Proxy) - Chi Tiết</div>
+        <img src="GUI/Preview/3.png" alt="Menu 代理">
+      </div>
+      <div class="description-wrapper">
+        <h3>Giải thích Menu 代理 (Proxy):</h3>
+        <p>Menu <span class="highlight">代理</span> chứa các tùy chọn liên quan đến proxy và kết nối mạng:</p>
+        <ul>
+          <li><b>代理设置</b> → <b>Thiết lập proxy</b>
+            <ul>
+              <li>Mở cửa sổ cấu hình proxy cho tool</li>
+              <li>Thiết lập thông tin proxy server (IP, port, username, password)</li>
+              <li>Có thể cấu hình proxy cho từng tài khoản hoặc toàn cục</li>
+              <li>Hỗ trợ các loại proxy: HTTP, HTTPS, SOCKS5</li>
+              <li>Giúp quản lý nhiều tài khoản trên các IP khác nhau</li>
+            </ul>
+          </li>
+          <li><b>网络修复</b> → <b>Sửa mạng</b>
+            <ul>
+              <li>Khắc phục các vấn đề kết nối mạng</li>
+              <li>Làm mới kết nối và reset các thiết lập mạng</li>
+              <li>Kiểm tra và sửa lỗi kết nối đến server game</li>
+              <li>Hữu ích khi gặp lỗi timeout, kết nối bị gián đoạn</li>
+              <li>Có thể reset DNS cache và các thiết lập mạng liên quan</li>
+          </ul>
+        </li>
+        </ul>
+        <div class="warning">
+          <b>⚠️ Lưu ý:</b> 
+          <ul>
+            <li>Khi sử dụng proxy, đảm bảo proxy server đang hoạt động và ổn định</li>
+            <li>Proxy không hợp lệ có thể khiến tool không thể kết nối đến server game</li>
+            <li>Nếu gặp lỗi mạng, thử <span class="highlight">网络修复</span> trước khi kiểm tra proxy</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview 4 -->
+    <div class="card image-section">
+      <div class="image-wrapper">
+        <div class="image-title">Ảnh 4: Menu 账号 (Account) - Chi Tiết</div>
+        <img src="GUI/Preview/4.png" alt="Menu 账号">
+      </div>
+      <div class="description-wrapper">
+        <h3>Giải thích Menu 账号 (Account):</h3>
+        <p>Menu <span class="highlight">账号</span> chứa các tùy chọn quản lý tài khoản game:</p>
+        <ul>
+          <li><b>重置全部</b> → <b>Đặt lại tất cả</b>
+            <ul>
+              <li>Đặt lại trạng thái và dữ liệu của tất cả tài khoản về trạng thái ban đầu</li>
+              <li>Reset trạng thái chạy, tạm dừng, dừng của tất cả dòng</li>
+              <li>Không xóa tài khoản khỏi danh sách, chỉ reset trạng thái</li>
+              <li>Hữu ích khi cần khởi động lại toàn bộ từ đầu</li>
+            </ul>
+          </li>
+          <li><b>清空账号</b> → <b>Xóa tài khoản</b>
+            <ul>
+              <li>Xóa toàn bộ danh sách tài khoản khỏi tool</li>
+              <li>Xóa tất cả các dòng trong bảng, bao gồm cả thông tin và cấu hình</li>
+              <li>Hành động này không thể hoàn tác, cần cẩn thận khi sử dụng</li>
+              <li>Thường dùng khi muốn bắt đầu với danh sách tài khoản mới</li>
+            </ul>
+          </li>
+          <li><b>批量导入</b> → <b>Nhập hàng loạt</b>
+            <ul>
+              <li>Nhập nhiều tài khoản cùng lúc từ file text hoặc CSV</li>
+              <li>Định dạng thường là: email|password hoặc email:password</li>
+              <li>Mỗi dòng trong file là một tài khoản</li>
+              <li>Tiết kiệm thời gian khi có nhiều tài khoản cần thêm</li>
+              <li>Hỗ trợ các định dạng file: .txt, .csv</li>
+            </ul>
+          </li>
+          <li><b>清理登录缓存</b> → <b>Dọn cache đăng nhập</b>
+            <ul>
+              <li>Xóa các file cache và session đăng nhập</li>
+              <li>Xóa thông tin đăng nhập đã lưu để buộc đăng nhập lại</li>
+              <li>Hữu ích khi gặp lỗi đăng nhập hoặc cần đổi tài khoản</li>
+              <li>Không ảnh hưởng đến danh sách tài khoản, chỉ xóa cache</li>
+          </ul>
+        </li>
+        </ul>
+        <div class="warning">
+          <b>⚠️ Cảnh báo:</b> 
+          <ul>
+            <li><span class="highlight">清空账号</span> sẽ xóa vĩnh viễn toàn bộ danh sách, không thể khôi phục</li>
+            <li>Trước khi <span class="highlight">清空账号</span>, nên backup danh sách tài khoản nếu cần</li>
+            <li><span class="highlight">重置全部</span> chỉ reset trạng thái, không xóa tài khoản</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview 5 -->
+    <div class="card image-section">
+      <div class="image-wrapper">
+        <div class="image-title">Ảnh 5: Menu 优化 (Optimize) - Chi Tiết</div>
+        <img src="GUI/Preview/5.png" alt="Menu 优化">
+      </div>
+      <div class="description-wrapper">
+        <h3>Giải thích Menu 优化 (Optimize):</h3>
+        <p>Menu <span class="highlight">优化</span> chứa các tùy chọn tối ưu hóa hiệu suất và hiển thị:</p>
+        <ul>
+          <li><b>优化开关</b> → <b>Bật/tắt tối ưu</b>
+            <ul>
+              <li>Bật hoặc tắt các tính năng tối ưu hóa hiệu năng</li>
+              <li>Khi bật: Tool sẽ tự động tối ưu CPU, RAM, và tài nguyên hệ thống</li>
+              <li>Giảm tải cho hệ thống khi chạy nhiều tài khoản cùng lúc</li>
+              <li>Tự động điều chỉnh độ phân giải, FPS của game để giảm tải</li>
+              <li>Hữu ích khi máy tính có cấu hình thấp hoặc chạy nhiều cửa sổ</li>
+              <li>Khi tắt: Game chạy ở chế độ bình thường, không tối ưu</li>
+            </ul>
+          </li>
+          <li><b>开关屏显</b> → <b>Bật/tắt hiển thị</b>
+            <ul>
+              <li>Bật hoặc tắt hiển thị overlay (màn hình phụ) toàn cục</li>
+              <li>Overlay hiển thị thông tin như: trạng thái, số lượng tài khoản, v.v.</li>
+              <li>Khi bật: Hiển thị overlay trên tất cả cửa sổ game</li>
+              <li>Khi tắt: Ẩn overlay trên tất cả cửa sổ</li>
+              <li>Có thể bật/tắt riêng cho từng dòng qua menu chuột phải</li>
+              <li>Overlay giúp theo dõi trạng thái mà không cần mở cửa sổ tool</li>
+            </ul>
+          </li>
+        </ul>
+        <div class="note">
+          <b>💡 Mẹo:</b> 
+          <ul>
+            <li>Nên bật <span class="highlight">优化开关</span> khi chạy nhiều tài khoản (4+) để tránh lag</li>
+            <li><span class="highlight">开关屏显</span> có thể ảnh hưởng đến hiệu năng, tắt nếu không cần thiết</li>
+            <li>Có thể tắt overlay cho từng dòng cụ thể qua menu chuột phải → <span class="highlight">屏显开关</span></li>
+      </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview 6 -->
+    <div class="card image-section">
+      <div class="image-wrapper">
+        <div class="image-title">Ảnh 6: Menu chuột phải (Right-click Menu)</div>
+        <img src="GUI/Preview/6.png" alt="Menu chuột phải">
+      </div>
+      <div class="description-wrapper">
+        <h3>Giải thích:</h3>
+        <p>Khi bạn click chuột phải vào một dòng tài khoản trong bảng, menu ngữ cảnh sẽ hiển thị với các tùy chọn sau:</p>
+        <ul>
+          <li><b>编辑账号</b> → <b>Sửa tài khoản</b>: Chỉnh sửa thông tin tài khoản (email, mật khẩu, v.v.) của dòng đang chọn.</li>
+          <li><b>删除单行</b> → <b>Xóa dòng đơn</b>: Xóa dòng tài khoản này khỏi danh sách.</li>
+          <li><b>重置单行</b> → <b>Đặt lại dòng đơn</b>: Đặt lại trạng thái và dữ liệu của dòng này về trạng thái ban đầu.</li>
+          <li><b>编辑配置</b> → <b>Sửa cấu hình</b>: Chỉnh sửa cấu hình chạy tự động cho dòng này (nhiệm vụ, thiết lập, v.v.).</li>
+          <li><b>代理信息</b> → <b>Thông tin proxy</b>: Xem hoặc chỉnh sửa thông tin proxy (máy chủ proxy) cho dòng này.</li>
+          <li><b>清理登录</b> → <b>Dọn dẹp đăng nhập</b>: Xóa thông tin đăng nhập (cache, session) của dòng này để đăng nhập lại.</li>
+          <li><b>屏显开关</b> → <b>Bật/tắt hiển thị màn hình</b>: Bật hoặc tắt hiển thị overlay/màn hình cho dòng này (chỉ ảnh hưởng dòng đang chọn).</li>
+      </ul>
+        <div class="note">
+          <b>💡 Lưu ý:</b> Menu này chỉ áp dụng cho dòng bạn đã chọn (có checkbox được tick). Các thao tác này chỉ ảnh hưởng đến dòng cụ thể đó, không ảnh hưởng đến các dòng khác.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Quy trình sử dụng cơ bản:</h3>
+      <ol>
+        <li>Nhập hoặc <b>批量导入</b> tài khoản vào danh sách</li>
+        <li>Thiết lập <b>游戏路径</b> (đường dẫn game)</li>
+        <li>Cấu hình <b>全局配置</b> hoặc cấu hình riêng từng dòng bằng <b>编辑配置</b></li>
+        <li>Chọn dòng, nhấn <b>添加任务</b> để gán nhiệm vụ tự động</li>
+        <li>Nhấn <b>启动选中</b> hoặc <b>启动全部</b> để bắt đầu chạy</li>
+        <li>Theo dõi trạng thái qua các cột trong bảng</li>
+        <li>Khi cần, dùng các nút <b>暂停</b>, <b>停止</b>, hoặc <b>恢复</b> tương ứng</li>
+      </ol>
+    </div>
+
+    </div>
+
+    <!-- PHẦN DETAIL -->
+    <div id="detail" class="tab-content">
+      <h2>⚙️ Detail - Hướng Dẫn Cấu Hình Chi Tiết</h2>
+      <p style="margin-bottom: 24px;">Phần này cung cấp hướng dẫn chi tiết về cách cấu hình và thiết lập tool để sử dụng hiệu quả.</p>
+
+      <div class="sub-nav-tabs">
+        <button class="sub-nav-tab active" onclick="showDetailTab('detail-1')">Cấu hình cơ bản (基础设置)</button>
+        <button class="sub-nav-tab" onclick="showDetailTab('detail-2')">Cài đặt vật phẩm (物品设置)</button>
+        <button class="sub-nav-tab" onclick="showDetailTab('detail-3')">Cài đặt treo máy (挂机设置)</button>
+        <button class="sub-nav-tab" onclick="showDetailTab('detail-4')">Cài đặt bang hội (公会设置)</button>
+        <button class="sub-nav-tab" onclick="showDetailTab('detail-5')">Cài đặt đấu giá (拍卖设置)</button>
+        <button class="sub-nav-tab" onclick="showDetailTab('detail-6')">Cài đặt tổ đội (组队设置)</button>
+      </div>
+
+      <!-- Detail Tab 1: Cấu hình cơ bản -->
+      <div id="detail-1" class="tab-content active">
+        <h3>Cấu hình cơ bản (基础设置)</h3>
+        <p style="margin-bottom: 24px;">Phần này hướng dẫn cách cấu hình các thiết lập cơ bản cho script tự động, bao gồm thông tin script, quy tắc nhân vật và các tùy chọn khác.</p>
+
+        <div class="card image-section">
+          <div class="image-wrapper">
+            <div class="image-title">Ảnh 1: Cửa sổ cấu hình cơ bản</div>
+            <img src="GUI/Detail/1.png" alt="Cấu hình cơ bản 1">
+          </div>
+          <div class="description-wrapper">
+            <h3>Giải thích:</h3>
+            <p>Đây là cửa sổ cấu hình cơ bản (<span class="highlight">基础设置</span>), nơi bạn có thể thiết lập các thông số cho script tự động. Cửa sổ này được chia thành 3 phần chính:</p>
+            
+            <h4>1. 脚本信息 (Script Information) - Thông tin script</h4>
+            <ul>
+              <li><b>脚本选择</b> → <b>Chọn script</b>: Dropdown để chọn loại script tự động sẽ chạy
+                <ul>
+                  <li>Các tùy chọn có sẵn được giải thích chi tiết ở ảnh 1.1</li>
+                </ul>
+              </li>
+              <li><b>Mô tả</b>: "停止执行主线,转执行委托,支线,挂机点" → "Dừng thực hiện nhiệm vụ chính, chuyển sang thực hiện nhiệm vụ ủy thác, nhiệm vụ phụ, điểm treo máy"</li>
+            </ul>
+
+            <h4>2. 角色规则 (Character Rules) - Quy tắc nhân vật</h4>
+            <ul>
+              <li><b>职业</b> → <b>Nghề nghiệp</b>: Dropdown chọn nghề nghiệp cho nhân vật (các tùy chọn ở ảnh 1.2)</li>
+              <li><b>命名</b> → <b>Đặt tên</b>: Dropdown chọn cách đặt tên nhân vật (các tùy chọn ở ảnh 1.3)</li>
+              <li><b>执行角色</b> → <b>Nhân vật thực thi</b>: Dropdown chọn nhân vật để thực thi (các tùy chọn ở ảnh 1.4)</li>
+              <li><b>手动创建角色</b> → <b>Tạo nhân vật thủ công</b>: Checkbox để bật/tắt tạo nhân vật thủ công</li>
+            </ul>
+
+            <h4>3. 其他设置 (Other Settings) - Cài đặt khác</h4>
+            <ul>
+              <li><b>执行角色数量</b> → <b>Số lượng nhân vật thực thi</b>: Ô nhập số lượng nhân vật sẽ được tạo/thực thi (mặc định: 1)</li>
+              <li><b>脚本完成后是否执行下一个账号</b> → <b>Hoàn thành script có thực thi tài khoản tiếp theo không</b>: Checkbox để tự động chuyển sang tài khoản tiếp theo sau khi script hoàn thành</li>
+              <li><b>角色完成后是否执行下一个角色</b> → <b>Hoàn thành nhân vật có thực thi nhân vật tiếp theo không</b>: Checkbox để tự động chuyển sang nhân vật tiếp theo sau khi nhân vật hiện tại hoàn thành</li>
+            </ul>
+
+            <div class="note">
+              <b>💡 Lưu ý:</b> Các cấu hình ở đây sẽ áp dụng cho cửa sổ đang được chỉnh sửa (hiển thị ở tiêu đề: "当前编辑窗口: 1" - Cửa sổ đang chỉnh sửa: 1).
+            </div>
+          </div>
+        </div>
+
+        <div class="card image-section">
+          <div class="image-wrapper">
+            <div class="image-title">Ảnh 1.1: Dropdown 脚本选择 (Chọn script)</div>
+            <img src="GUI/Detail/1.1.png" alt="Cấu hình cơ bản 1.1">
+          </div>
+          <div class="description-wrapper">
+            <h3>Giải thích các tùy chọn trong dropdown 脚本选择:</h3>
+            <ul>
+              <li><b>不做主线</b> → <b>Không làm nhiệm vụ chính</b>: Script sẽ dừng thực hiện nhiệm vụ chính, chuyển sang thực hiện nhiệm vụ ủy thác, nhiệm vụ phụ và điểm treo máy</li>
+              <li><b>自动1-70</b> → <b>Tự động 1-70</b>: Script tự động chơi từ cấp 1 đến cấp 70</li>
+              <li><b>自动1-20</b> → <b>Tự động 1-20</b>: Script tự động chơi từ cấp 1 đến cấp 20</li>
+              <li><b>只创角色</b> → <b>Chỉ tạo nhân vật</b>: Script chỉ tạo nhân vật mới, không thực hiện các nhiệm vụ</li>
+              <li><b>自动到指定等级</b> → <b>Tự động đến cấp chỉ định</b>: Script tự động chơi đến cấp độ mà bạn chỉ định</li>
+              <li><b>抽卡模式</b> → <b>Chế độ rút thẻ</b>: Script sẽ chạy ở chế độ rút thẻ/gacha</li>
+            </ul>
+            <div class="note">
+              <b>💡 Mẹo:</b> Tùy chọn <span class="highlight">不做主线</span> phù hợp khi bạn muốn nhân vật tập trung vào nhiệm vụ phụ và treo máy thay vì nhiệm vụ chính.
+            </div>
+          </div>
+        </div>
+
+        <div class="card image-section">
+          <div class="image-wrapper">
+            <div class="image-title">Ảnh 1.2: Dropdown 职业 (Nghề nghiệp)</div>
+            <img src="GUI/Detail/1.2.png" alt="Cấu hình cơ bản 1.2">
+          </div>
+          <div class="description-wrapper">
+            <h3>Giải thích các tùy chọn trong dropdown 职业:</h3>
+            <p>Dropdown này cho phép bạn chọn nghề nghiệp (class) cho nhân vật sẽ được tạo:</p>
+            <ul>
+              <li><b>弓箭手</b> → <b>Xạ thủ</b>: Nhân vật sử dụng cung tên (Archer)</li>
+              <li><b>Các nghề nghiệp khác</b>: Tùy thuộc vào game, có thể có các nghề nghiệp khác như:
+                <ul>
+                  <li><b>战士</b> → <b>Chiến sĩ</b> (Warrior)</li>
+                  <li><b>法师</b> → <b>Pháp sư</b> (Mage)</li>
+                  <li><b>刺客</b> → <b>Sát thủ</b> (Assassin)</li>
+                  <li><b>牧师</b> → <b>Mục sư</b> (Priest/Healer)</li>
+                  <li>Và các nghề nghiệp khác trong game</li>
+                </ul>
+              </li>
+            </ul>
+            <div class="note">
+              <b>💡 Lưu ý:</b> Nghề nghiệp được chọn sẽ áp dụng cho tất cả nhân vật được tạo tự động trong cửa sổ này.
+            </div>
+          </div>
+        </div>
+
+        <div class="card image-section">
+          <div class="image-wrapper">
+            <div class="image-title">Ảnh 1.3: Dropdown 命名 (Đặt tên)</div>
+            <img src="GUI/Detail/1.3.png" alt="Cấu hình cơ bản 1.3">
+          </div>
+          <div class="description-wrapper">
+            <h3>Giải thích các tùy chọn trong dropdown 命名:</h3>
+            <p>Dropdown này cho phép bạn chọn cách đặt tên cho nhân vật:</p>
+            <ul>
+              <li><b>随机英文数字</b> → <b>Ngẫu nhiên chữ cái và số tiếng Anh</b>: Tự động tạo tên nhân vật bằng chữ cái và số ngẫu nhiên (ví dụ: abc123, xyz789)</li>
+              <li><b>Các tùy chọn khác có thể có</b>:
+                <ul>
+                  <li><b>随机中文</b> → <b>Ngẫu nhiên tiếng Trung</b>: Tên nhân vật bằng tiếng Trung ngẫu nhiên</li>
+                  <li><b>自定义</b> → <b>Tùy chỉnh</b>: Nhập tên tùy chỉnh</li>
+                  <li><b>前缀+随机</b> → <b>Tiền tố + Ngẫu nhiên</b>: Tên có tiền tố cố định + phần ngẫu nhiên</li>
+                  <li><b>手动命名</b> → <b>Đặt tên thủ công</b>: Bạn sẽ tự đặt tên khi tạo nhân vật</li>
+                </ul>
+              </li>
+            </ul>
+            <div class="note">
+              <b>💡 Mẹo:</b> Tùy chọn <span class="highlight">随机英文数字</span> giúp tạo tên nhanh chóng và tránh trùng lặp.
+            </div>
+          </div>
+        </div>
+
+        <div class="card image-section">
+          <div class="image-wrapper">
+            <div class="image-title">Ảnh 1.4: Dropdown 执行角色 (Nhân vật thực thi)</div>
+            <img src="GUI/Detail/1.4.png" alt="Cấu hình cơ bản 1.4">
+          </div>
+          <div class="description-wrapper">
+            <h3>Giải thích các tùy chọn trong dropdown 执行角色:</h3>
+            <p>Dropdown này cho phép bạn chọn nhân vật nào sẽ được sử dụng để thực thi script:</p>
+            <ul>
+              <li><b>默认</b> → <b>Mặc định</b>: Sử dụng nhân vật mặc định (thường là nhân vật đầu tiên hoặc nhân vật chính)</li>
+              <li><b>Các tùy chọn khác có thể có</b>:
+                <ul>
+                  <li><b>第一个角色</b> → <b>Nhân vật đầu tiên</b>: Luôn sử dụng nhân vật đầu tiên trong danh sách</li>
+                  <li><b>最后一个角色</b> → <b>Nhân vật cuối cùng</b>: Luôn sử dụng nhân vật cuối cùng trong danh sách</li>
+                  <li><b>按顺序</b> → <b>Theo thứ tự</b>: Sử dụng nhân vật theo thứ tự trong danh sách</li>
+                  <li><b>随机选择</b> → <b>Chọn ngẫu nhiên</b>: Chọn ngẫu nhiên một nhân vật để thực thi</li>
+                  <li><b>指定角色</b> → <b>Chỉ định nhân vật</b>: Chọn một nhân vật cụ thể</li>
+                </ul>
+              </li>
+            </ul>
+            <div class="note">
+              <b>💡 Lưu ý:</b> Tùy chọn <span class="highlight">默认</span> thường là lựa chọn phù hợp nhất cho hầu hết trường hợp sử dụng.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Tab 2: Cài đặt vật phẩm -->
+      <div id="detail-2" class="tab-content">
+        <h3>Cài đặt vật phẩm (物品设置)</h3>
+        <p style="margin-bottom: 24px;">Phần này hướng dẫn cách cấu hình các thiết lập về vật phẩm, bao gồm tự động mua vật phẩm, xử lý vật phẩm, mua hàng tại cửa hàng, chế tạo và nâng cấp.</p>
+
+        <!-- Sub-tabs cho Tab 2 -->
+        <div class="sub-nav-tabs" id="detail-2-sub-tabs">
+          <button class="sub-nav-tab active" onclick="showSubTab('detail-2-1')">Cài đặt bổ sung (补给设置)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-2-2')">Xử lý vật phẩm (物品处理)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-2-3')">Giới hạn mua hàng tại cửa hàng (商城限购)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-2-4')">Chế tạo vật phẩm (物品制作)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-2-5')">Nâng cấp và mở rộng (强化扩展)</button>
+        </div>
+
+        <!-- Sub-tab 2.1: 补给设置 -->
+        <div id="detail-2-1" class="tab-content active">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 2.1: 补给设置 (Cài đặt bổ sung)</div>
+              <img src="GUI/Detail/2.1.png" alt="物品设置 2.1">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">补给设置</span> (Cài đặt bổ sung), cho phép bạn cấu hình tự động mua vật phẩm khi số lượng giảm xuống dưới ngưỡng.</p>
+              
+              <h4>1. 补给地点 (Supply Location) - Địa điểm bổ sung</h4>
+              <ul>
+                <li>Dropdown để chọn địa điểm mua vật phẩm</li>
+                <li><b>阿斯加德城堡</b> → <b>Lâu đài Asgard</b>: Một trong các địa điểm có thể chọn</li>
+                <li>Có thể có các địa điểm khác tùy theo game</li>
+              </ul>
+
+              <h4>2. 补给选择 (Supply Selection) - Lựa chọn bổ sung</h4>
+              <ul>
+                <li>Dropdown để chọn cách thức bổ sung</li>
+                <li><b>智能等级选择</b> → <b>Chọn thông minh theo cấp độ</b>: Tự động chọn vật phẩm phù hợp với cấp độ hiện tại</li>
+              </ul>
+
+              <h4>3. Cấu hình tự động mua vật phẩm</h4>
+              <p>Mỗi dòng cấu hình có format: <b>[Tên vật phẩm] <= [Số lượng tối thiểu] 个, 自动前往补给地点购买至 [Số lượng mua đến] 个</b></p>
+              <ul>
+                <li><b>红药</b> → <b>Thuốc đỏ</b>: 
+                  <ul>
+                    <li>Khi số lượng <= 200, tự động đến địa điểm bổ sung mua đến 800</li>
+                  </ul>
+                </li>
+                <li><b>瞬间移动卷轴</b> → <b>Cuộn dịch chuyển tức thời</b>:
+                  <ul>
+                    <li>Khi số lượng <= 5, tự động mua đến 30</li>
+                  </ul>
+                </li>
+                <li><b>据点回归卷轴</b> → <b>Cuộn quay về căn cứ</b>:
+                  <ul>
+                    <li>Khi số lượng <= 5, tự động mua đến 20</li>
+                  </ul>
+                </li>
+                <li><b>旧钥匙</b> → <b>Chìa khóa cũ</b>:
+                  <ul>
+                    <li>Khi số lượng <= 0, tự động mua đến 0 (có thể tắt tính năng này bằng cách đặt = 0)</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <div class="note">
+                <b>💡 Lưu ý:</b> Đặt giá trị = 0 cho cả hai trường sẽ tắt tính năng tự động mua vật phẩm đó. Tool sẽ tự động kiểm tra và mua vật phẩm khi số lượng xuống dưới ngưỡng.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 2.2: 物品处理 -->
+        <div id="detail-2-2" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 2.2: 物品处理 (Xử lý vật phẩm)</div>
+              <img src="GUI/Detail/2.2.png" alt="物品设置 2.2">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">物品处理</span> (Xử lý vật phẩm), cho phép bạn cấu hình tự động xử lý các vật phẩm như phân giải, thu thập, sử dụng, v.v.</p>
+              
+              <h4>1. 简单配置 (Simple Configuration) - Cấu hình đơn giản</h4>
+              <p>Các checkbox tự động xử lý vật phẩm:</p>
+              <ul>
+                <li><b>分解绑定白装</b> → <b>Phân giải trang bị trắng đã gắn</b>: Tự động phân giải trang bị màu trắng đã gắn vào nhân vật</li>
+                <li><b>分解非绑定白装</b> → <b>Phân giải trang bị trắng chưa gắn</b>: Tự động phân giải trang bị màu trắng chưa gắn</li>
+                <li><b>分解绑定绿装</b> → <b>Phân giải trang bị xanh lá đã gắn</b>: Tự động phân giải trang bị màu xanh lá đã gắn</li>
+                <li><b>分解非绑定绿装</b> → <b>Phân giải trang bị xanh lá chưa gắn</b>: Tự động phân giải trang bị màu xanh lá chưa gắn</li>
+                <li><b>自动收藏图鉴</b> → <b>Tự động thu thập bộ sưu tập</b>: Tự động thu thập vật phẩm vào bộ sưu tập</li>
+                <li><b>收藏可交易装备</b> → <b>Thu thập trang bị có thể giao dịch</b>: Tự động thu thập trang bị có thể giao dịch</li>
+                <li><b>使用副本充能道具</b> → <b>Sử dụng vật phẩm nạp năng lượng phó bản</b>: Tự động sử dụng vật phẩm nạp năng lượng cho phó bản</li>
+                <li><b>自动合成皮肤</b> → <b>Tự động hợp thành trang phục</b>: Tự động hợp thành trang phục từ vật liệu</li>
+                <li><b>自动合成宠物</b> → <b>Tự động hợp thành thú cưng</b>: Tự động hợp thành thú cưng từ vật liệu</li>
+              </ul>
+
+              <h4>2. 扩展配置 (Extended Configuration) - Cấu hình mở rộng</h4>
+              <ul>
+                <li><b>背包格子数量剩余不足 <= [Số] 个时,回补给点执行需存仓的物品</b> → <b>Khi số ô túi còn lại <= [Số], quay về điểm bổ sung để cất vật phẩm cần lưu kho</b>
+                  <ul>
+                    <li>Khi số ô trống trong túi <= 5, tự động quay về điểm bổ sung để cất vật phẩm vào kho</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>3. Quản lý vật phẩm chi tiết</h4>
+              <p><b>Bảng trái (Tìm kiếm/Thêm):</b></p>
+              <ul>
+                <li><b>物品ID</b> → <b>ID vật phẩm</b>: Nhập ID vật phẩm để tìm</li>
+                <li><b>物品名</b> → <b>Tên vật phẩm</b>: Nhập tên vật phẩm để tìm</li>
+                <li><b>搜索</b> → <b>Tìm kiếm</b>: Nút tìm kiếm vật phẩm</li>
+                <li><b>类型</b> → <b>Loại</b>: Dropdown chọn loại xử lý (ví dụ: "分解" - Phân giải)</li>
+                <li><b>选择</b> → <b>Chọn</b>: Ô nhập giá trị (ví dụ: 0)</li>
+                <li><b>读取背包</b> → <b>Đọc túi</b>: Nút đọc danh sách vật phẩm từ túi</li>
+                <li><b>添加</b> → <b>Thêm</b>: Thêm vật phẩm vào danh sách xử lý</li>
+                <li><b>删除</b> → <b>Xóa</b>: Xóa vật phẩm khỏi danh sách</li>
+                <li><b>修改</b> → <b>Sửa</b>: Sửa cấu hình vật phẩm</li>
+                <li><b>保存</b> → <b>Lưu</b>: Lưu cấu hình</li>
+              </ul>
+
+              <p><b>Bảng phải (Danh sách vật phẩm đã cấu hình):</b></p>
+              <ul>
+                <li>Hiển thị danh sách vật phẩm với các cột:
+                  <ul>
+                    <li>Checkbox: Bật/tắt xử lý vật phẩm này</li>
+                    <li><b>物品ID</b>: ID vật phẩm</li>
+                    <li><b>物品名</b>: Tên vật phẩm</li>
+                    <li><b>处理类型</b> → <b>Loại xử lý</b>: Cách xử lý (ví dụ: "开物品箱" - Mở hộp vật phẩm)</li>
+                    <li><b>扩展</b> → <b>Mở rộng</b>: Giá trị mở rộng (thường là 0)</li>
+                  </ul>
+                </li>
+                <li>Ví dụ các vật phẩm: Hộp vật liệu, Hộp phần thưởng, Gói bạc, Hộp trang bị, v.v.</li>
+              </ul>
+
+              <div class="note">
+                <b>💡 Mẹo:</b> Sử dụng <span class="highlight">读取背包</span> để tự động đọc danh sách vật phẩm từ túi và thêm vào danh sách xử lý.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 2.3: 商城限购 -->
+        <div id="detail-2-3" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 2.3: 商城限购 (Giới hạn mua hàng tại cửa hàng)</div>
+              <img src="GUI/Detail/2.3.png" alt="物品设置 2.3">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">商城限购</span> (Giới hạn mua hàng tại cửa hàng), cho phép bạn cấu hình tự động mua vật phẩm từ cửa hàng trong game.</p>
+              
+              <h4>1. Cài đặt chung</h4>
+              <ul>
+                <li><b>确保购买后身上金币还剩余 [Số] 以上[填0默认20万]</b> → <b>Đảm bảo sau khi mua, số vàng còn lại >= [Số] [Điền 0 = mặc định 200,000]</b>
+                  <ul>
+                    <li>Đảm bảo luôn giữ lại số vàng tối thiểu sau khi mua (mặc định: 200,000 nếu điền 0)</li>
+                  </ul>
+                </li>
+                <li><b>上线后每隔 [Số] 小时,执行一次商城购买判断操作</b> → <b>Sau khi đăng nhập, mỗi [Số] giờ, thực hiện một lần kiểm tra và mua hàng tại cửa hàng</b>
+                  <ul>
+                    <li>Kiểm tra và mua hàng tự động theo chu kỳ (điền 0 để tắt)</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>2. Danh sách vật phẩm mua tự động</h4>
+              <p>Các checkbox để chọn vật phẩm sẽ tự động mua:</p>
+              
+              <p><b>Hàng 1:</b></p>
+              <ul>
+                <li><b>购买防具强化石</b> → <b>Mua đá nâng cấp giáp</b></li>
+                <li><b>购买武器强化石</b> → <b>Mua đá nâng cấp vũ khí</b></li>
+                <li><b>购买首饰强化石</b> → <b>Mua đá nâng cấp trang sức</b></li>
+                <li><b>购买生活强化石</b> → <b>Mua đá nâng cấp sinh hoạt</b></li>
+              </ul>
+
+              <p><b>Hàng 2:</b></p>
+              <ul>
+                <li><b>购买防具强化宝箱</b> → <b>Mua hộp nâng cấp giáp</b></li>
+                <li><b>购买武器强化宝箱</b> → <b>Mua hộp nâng cấp vũ khí</b></li>
+                <li><b>购买首饰强化宝箱</b> → <b>Mua hộp nâng cấp trang sức</b></li>
+                <li><b>购买生活强化宝箱</b> → <b>Mua hộp nâng cấp sinh hoạt</b></li>
+              </ul>
+
+              <p><b>Hàng 3:</b></p>
+              <ul>
+                <li><b>购买中级外观</b> → <b>Mua ngoại hình trung cấp</b></li>
+                <li><b>购买中级坐骑</b> → <b>Mua ngựa trung cấp</b></li>
+                <li><b>购买1级魔力药</b> → <b>Mua thuốc ma lực cấp 1</b></li>
+              </ul>
+
+              <p><b>Hàng 4:</b></p>
+              <ul>
+                <li><b>购买高级外观</b> → <b>Mua ngoại hình cao cấp</b></li>
+                <li><b>购买高级坐骑</b> → <b>Mua ngựa cao cấp</b></li>
+                <li><b>购买2级魔力药</b> → <b>Mua thuốc ma lực cấp 2</b></li>
+              </ul>
+
+              <div class="warning">
+                <b>⚠️ Cảnh báo:</b> Đảm bảo có đủ vàng trước khi bật tính năng này. Tool sẽ tự động mua các vật phẩm đã chọn theo chu kỳ đã đặt.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 2.4: 物品制作 -->
+        <div id="detail-2-4" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 2.4: 物品制作 (Chế tạo vật phẩm)</div>
+              <img src="GUI/Detail/2.4.png" alt="物品设置 2.4">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">物品制作</span> (Chế tạo vật phẩm), cho phép bạn cấu hình tự động chế tạo các vật phẩm trong game.</p>
+              
+              <h4>1. Cài đặt chu kỳ chế tạo</h4>
+              <ul>
+                <li><b>上线后每隔 [Số] 小时,执行一次制作[填0关闭]</b> → <b>Sau khi đăng nhập, mỗi [Số] giờ, thực hiện một lần chế tạo [Điền 0 để tắt]</b>
+                  <ul>
+                    <li>Thiết lập chu kỳ tự động chế tạo (ví dụ: 3 giờ)</li>
+                    <li>Điền 0 để tắt tính năng tự động chế tạo</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>2. Danh sách vật phẩm chế tạo</h4>
+              <p>Các checkbox để chọn vật phẩm sẽ tự động chế tạo:</p>
+              
+              <p><b>Hàng 1 - Cơ bản:</b></p>
+              <ul>
+                <li><b>食物制作</b> → <b>Chế tạo thức ăn</b>: Tự động chế tạo thức ăn</li>
+                <li><b>BUFF书制作</b> → <b>Chế tạo sách BUFF</b>: Tự động chế tạo sách tăng sức mạnh</li>
+              </ul>
+
+              <p><b>Hàng 2 - Vật liệu trung cấp:</b></p>
+              <ul>
+                <li><b>中级钢铁</b> → <b>Thép trung cấp</b></li>
+                <li><b>中级亚麻</b> → <b>Lanh trung cấp</b></li>
+                <li><b>中级宝石</b> → <b>Đá quý trung cấp</b></li>
+                <li><b>中级部件</b> → <b>Linh kiện trung cấp</b></li>
+              </ul>
+
+              <p><b>Hàng 3 - Vật liệu cao cấp:</b></p>
+              <ul>
+                <li><b>上级钢铁</b> → <b>Thép cao cấp</b></li>
+                <li><b>上级亚麻</b> → <b>Lanh cao cấp</b></li>
+                <li><b>上级宝石</b> → <b>Đá quý cao cấp</b></li>
+                <li><b>上级部件</b> → <b>Linh kiện cao cấp</b></li>
+              </ul>
+
+              <p><b>Hàng 4 - Vật liệu đỉnh cao:</b></p>
+              <ul>
+                <li><b>顶级钢铁</b> → <b>Thép đỉnh cao</b></li>
+                <li><b>顶级亚麻</b> → <b>Lanh đỉnh cao</b></li>
+                <li><b>顶级宝石</b> → <b>Đá quý đỉnh cao</b></li>
+                <li><b>顶级部件</b> → <b>Linh kiện đỉnh cao</b></li>
+              </ul>
+
+              <p><b>Hàng 5 - Chất mài:</b></p>
+              <ul>
+                <li><b>中级研磨剂</b> → <b>Chất mài trung cấp</b></li>
+                <li><b>高级研磨剂</b> → <b>Chất mài cao cấp</b></li>
+              </ul>
+
+              <p><b>Hàng 6 - Bản vẽ màu xanh:</b></p>
+              <ul>
+                <li><b>蓝武器图纸</b> → <b>Bản vẽ vũ khí xanh</b></li>
+                <li><b>蓝防具图纸</b> → <b>Bản vẽ giáp xanh</b></li>
+                <li><b>蓝首饰图纸</b> → <b>Bản vẽ trang sức xanh</b></li>
+                <li><b>蓝生活图纸</b> → <b>Bản vẽ sinh hoạt xanh</b></li>
+              </ul>
+
+              <p><b>Hàng 7 - Trang bị màu xanh:</b></p>
+              <ul>
+                <li><b>本职业蓝武器</b> → <b>Vũ khí xanh của nghề này</b>: Chế tạo vũ khí xanh cho nghề nghiệp hiện tại</li>
+                <li><b>本职业蓝副武器</b> → <b>Vũ khí phụ xanh của nghề này</b></li>
+                <li><b>蓝项链</b> → <b>Vòng cổ xanh</b></li>
+                <li><b>蓝手环</b> → <b>Vòng tay xanh</b></li>
+                <li><b>蓝戒指[该行已存在佩戴的蓝色不会继续制作]</b> → <b>Nhẫn xanh [Nếu đã có nhẫn xanh đang đeo thì sẽ không tiếp tục chế tạo]</b></li>
+              </ul>
+
+              <p><b>Hàng 8 - Hộp hổ phách:</b></p>
+              <ul>
+                <li><b>制作上架琥珀盒</b> → <b>Chế tạo và đăng bán hộp hổ phách</b>: Chế tạo hộp hổ phách và đăng lên chợ</li>
+              </ul>
+
+              <div class="note">
+                <b>💡 Lưu ý:</b> Tool sẽ tự động chế tạo các vật phẩm đã chọn theo chu kỳ đã đặt. Đảm bảo có đủ nguyên liệu trước khi bật tính năng này.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 2.5: 强化扩展 -->
+        <div id="detail-2-5" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 2.5: 强化扩展 (Nâng cấp và mở rộng)</div>
+              <img src="GUI/Detail/2.5.png" alt="物品设置 2.5">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">强化扩展</span> (Nâng cấp và mở rộng), cho phép bạn cấu hình tự động nâng cấp trang bị có thể giao dịch.</p>
+              
+              <h4>1. Bật/tắt tính năng</h4>
+              <ul>
+                <li><b>开启强化扩展 [开启后下列功能生效]</b> → <b>Bật nâng cấp mở rộng [Sau khi bật, các chức năng sau sẽ có hiệu lực]</b>
+                  <ul>
+                    <li>Checkbox để bật/tắt toàn bộ tính năng nâng cấp tự động</li>
+                    <li>Chỉ khi checkbox này được bật, các cài đặt phía dưới mới có hiệu lực</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>2. Ngưỡng Hổ phách</h4>
+              <ul>
+                <li><b>琥珀低于 [Số] 停止强化 [填0默认2000]</b> → <b>Khi Hổ phách < [Số] thì dừng nâng cấp [Điền 0 = mặc định 2000]</b>
+                  <ul>
+                    <li>Khi số lượng Hổ phách xuống dưới ngưỡng này, sẽ dừng tự động nâng cấp</li>
+                    <li>Mặc định: 2000 nếu điền 0</li>
+                    <li>Giúp bảo toàn tài nguyên quan trọng</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>3. Nâng cấp tự động theo độ hiếm trang bị</h4>
+              <p>Có 3 phần tương tự cho 3 độ hiếm trang bị:</p>
+              
+              <p><b>Trang bị trắng (白装):</b></p>
+              <ul>
+                <li><b>自动强化可交易(白装)</b> → <b>Tự động nâng cấp trang bị có thể giao dịch (trắng)</b>: Checkbox bật/tắt</li>
+                <li><b>Dropdown cấp độ nâng cấp</b>: Chọn cấp độ nâng cấp đến (ví dụ: +6)</li>
+                <li>Các option có thể: +1, +3, +6, +9, +12, v.v.</li>
+              </ul>
+
+              <p><b>Trang bị xanh lá (绿装):</b></p>
+              <ul>
+                <li><b>自动强化可交易(绿装)</b> → <b>Tự động nâng cấp trang bị có thể giao dịch (xanh lá)</b>: Checkbox bật/tắt</li>
+                <li><b>Dropdown cấp độ nâng cấp</b>: Chọn cấp độ nâng cấp đến (ví dụ: +6)</li>
+              </ul>
+
+              <p><b>Trang bị xanh dương (蓝装):</b></p>
+              <ul>
+                <li><b>自动强化可交易(蓝装)</b> → <b>Tự động nâng cấp trang bị có thể giao dịch (xanh dương)</b>: Checkbox bật/tắt</li>
+                <li><b>Dropdown cấp độ nâng cấp</b>: Chọn cấp độ nâng cấp đến (ví dụ: +6)</li>
+              </ul>
+
+              <div class="warning">
+                <b>⚠️ Cảnh báo:</b> Tính năng này sẽ tự động nâng cấp trang bị có thể giao dịch, tiêu tốn Hổ phách. Đảm bảo đã thiết lập ngưỡng Hổ phách phù hợp để tránh tiêu hết tài nguyên.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Tab 3: Cài đặt treo máy -->
+      <div id="detail-3" class="tab-content">
+        <h3>Cài đặt treo máy (挂机设置)</h3>
+        <p style="margin-bottom: 24px;">Phần này cho phép bạn cấu hình chi tiết các điểm và quy tắc treo máy tự động, bao gồm đơn điểm, đa điểm, phó bản và các thiết lập bảo vệ.</p>
+
+        <!-- Sub-tabs cho Tab 3 -->
+        <div class="sub-nav-tabs" id="detail-3-sub-tabs">
+          <button class="sub-nav-tab active" onclick="showSubTab('detail-3-1')">Treo máy đơn điểm (单点挂机)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-3-2')">Treo máy đa điểm (多点挂机)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-3-3')">Tọa độ đa điểm (多点坐标)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-3-4')">Phó bản tích hợp (内置副本)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-3-5')">Cài đặt treo máy 1 (挂机设置1)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-3-6')">Cài đặt treo máy 2 (挂机设置2)</button>
+          <button class="sub-nav-tab" onclick="showSubTab('detail-3-7')">Bảo vệ treo máy (挂机保护)</button>
+        </div>
+
+        <!-- Sub-tab 3.1: 单点挂机 -->
+        <div id="detail-3-1" class="tab-content active">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 3.1: 单点挂机 (Treo máy đơn điểm)</div>
+              <img src="GUI/Detail/3.1.png" alt="挂机设置 3.1">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">单点挂机</span> (Treo máy đơn điểm), cho phép bạn cấu hình treo máy tại một điểm cố định. Giao diện bao gồm bảng danh sách điểm treo máy và khu vực nhập liệu để thêm/sửa/xóa điểm.</p>
+              
+              <h4>1. Hướng dẫn sử dụng</h4>
+              <ul>
+                <li><b>ps.选中一行挂机点按方向键可以调整顺序</b> → <b>ps. Chọn một hàng điểm treo máy và nhấn phím mũi tên để điều chỉnh thứ tự</b>
+                  <ul>
+                    <li>Hướng dẫn: Chọn một hàng trong bảng và dùng phím mũi tên ↑↓ để sắp xếp lại thứ tự các điểm treo máy</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>2. Bảng danh sách điểm treo máy</h4>
+              <p>Bảng hiển thị danh sách các điểm treo máy/thu thập đã được cấu hình với các cột:</p>
+              <ul>
+                <li><b>等级</b> → <b>Cấp độ</b>: Cấp độ yêu cầu hoặc cấp độ nhân vật khi thực hiện hành động</li>
+                <li><b>地图</b> → <b>Bản đồ</b>: Mã hoặc tên bản đồ nơi điểm treo máy/thu thập được đặt</li>
+                <li><b>传送点</b> → <b>Điểm dịch chuyển</b>: Mã hoặc ID của điểm dịch chuyển liên quan</li>
+                <li><b>类型</b> → <b>Loại</b>: Loại hành động tại điểm này
+                  <ul>
+                    <li><b>普通采集</b> → <b>Thu thập thông thường</b>: Thu thập tài nguyên</li>
+                    <li><b>挂机</b> → <b>Treo máy</b>: Treo máy để farm quái vật</li>
+                  </ul>
+                </li>
+                <li><b>起始(时)</b> → <b>Bắt đầu (giờ)</b>: Giờ bắt đầu thực hiện hành động</li>
+                <li><b>起始(分)</b> → <b>Bắt đầu (phút)</b>: Phút bắt đầu thực hiện hành động</li>
+                <li><b>终止(时)</b> → <b>Kết thúc (giờ)</b>: Giờ kết thúc thực hiện hành động</li>
+                <li><b>终止(分)</b> → <b>Kết thúc (phút)</b>: Phút kết thúc thực hiện hành động</li>
+                <li><b>x, y, z</b>: Tọa độ không gian của điểm treo máy/thu thập trong game</li>
+                <li><b>备注</b> → <b>Ghi chú</b>: Mô tả ngắn gọn về điểm treo máy</li>
+              </ul>
+
+              <p><b>Ví dụ dữ liệu trong bảng:</b></p>
+              <ul>
+                <li><b>Hàng 1:</b> Cấp 20, Bản đồ 101003..., Điểm dịch chuyển 17008, Loại "普通采集" (Thu thập thông thường), Thời gian 0:0 đến 0:0, Tọa độ (432, -22191, -19477), Ghi chú "每日采集坐标1" (Tọa độ thu thập hàng ngày 1)</li>
+                <li><b>Hàng 2:</b> Cấp 20, Bản đồ 101003..., Điểm dịch chuyển 17006, Loại "普通采集", Thời gian 0:0 đến 0:0, Tọa độ (-2910, -5221, -19350), Ghi chú "每日采集坐标2" (Tọa độ thu thập hàng ngày 2)</li>
+                <li><b>Hàng 3:</b> Cấp 20, Bản đồ 101004..., Điểm dịch chuyển 19006, Loại "普通采集", Thời gian 0:0 đến 0:0, Tọa độ (-19608, -10662, 1905), Ghi chú "每日采集坐标3" (Tọa độ thu thập hàng ngày 3)</li>
+                <li><b>Hàng 4:</b> Cấp 20, Bản đồ 101004..., Điểm dịch chuyển 19005, Loại "普通采集", Thời gian 0:0 đến 0:0, Tọa độ (-5642, -863, 1982), Ghi chú "每日采集坐标4" (Tọa độ thu thập hàng ngày 4)</li>
+                <li><b>Hàng 5:</b> Cấp 25, Bản đồ 102003..., Điểm dịch chuyển 25022, Loại "挂机" (Treo máy), Thời gian 0:0 đến 0:0, Tọa độ (-14896, 8059, 2491), Ghi chú "30级怪物挂机点" (Điểm treo máy quái vật cấp 30)</li>
+              </ul>
+
+              <h4>3. Khu vực nhập liệu/chỉnh sửa điểm treo máy</h4>
+              <p>Các trường để nhập thông tin điểm treo máy mới hoặc chỉnh sửa điểm đã có:</p>
+              <ul>
+                <li><b>取游戏当前位置信息</b> → <b>Lấy thông tin vị trí hiện tại trong game</b>: Nút để tự động điền thông tin về bản đồ, tọa độ x, y, z của nhân vật hiện tại vào các trường tương ứng</li>
+                <li><b>人物等级</b> → <b>Cấp độ nhân vật</b>: Trường nhập số cấp độ nhân vật (mặc định: 0)</li>
+                <li><b>起始时间</b> → <b>Thời gian bắt đầu</b>: 
+                  <ul>
+                    <li>Hai trường nhập số cho giờ và phút (mặc định: 0 : 0)</li>
+                    <li>Thiết lập thời gian bắt đầu thực hiện hành động</li>
+                  </ul>
+                </li>
+                <li><b>终止时间</b> → <b>Thời gian kết thúc</b>:
+                  <ul>
+                    <li>Hai trường nhập số cho giờ và phút (mặc định: 0 : 0)</li>
+                    <li>Thiết lập thời gian kết thúc thực hiện hành động</li>
+                  </ul>
+                </li>
+                <li><b>类型</b> → <b>Loại</b>: Dropdown để chọn loại hành động
+                  <ul>
+                    <li>Hiện đang hiển thị: <b>挂机</b> (Treo máy)</li>
+                    <li>Các tùy chọn khác có thể: "普通采集" (Thu thập thông thường), v.v.</li>
+                  </ul>
+                </li>
+                <li><b>地图</b> → <b>Bản đồ</b>: Trường nhập số mã bản đồ (mặc định: 0)</li>
+                <li><b>传送点</b> → <b>Điểm dịch chuyển</b>: Trường nhập số mã điểm dịch chuyển (mặc định: 0)</li>
+                <li><b>x, y, z</b>: Các trường nhập số tọa độ không gian (mặc định: 0)</li>
+                <li><b>备注</b> → <b>Ghi chú</b>: Trường nhập văn bản mô tả điểm treo máy (mặc định: "暂无描述" - Tạm thời không có mô tả)</li>
+              </ul>
+
+              <h4>4. Các nút hành động</h4>
+              <ul>
+                <li><b>添加</b> → <b>Thêm</b>: Thêm điểm treo máy mới vào danh sách dựa trên thông tin đã nhập trong khu vực nhập liệu</li>
+                <li><b>删除</b> → <b>Xóa</b>: Xóa điểm treo máy đã chọn trong danh sách</li>
+                <li><b>修改</b> → <b>Sửa đổi</b>: Cập nhật thông tin của điểm treo máy đã chọn trong danh sách bằng dữ liệu từ khu vực nhập liệu</li>
+                <li><b>保存</b> → <b>Lưu</b>: Lưu lại tất cả các thay đổi trong cấu hình điểm treo máy</li>
+              </ul>
+
+              <div class="note">
+                <b>💡 Mẹo:</b> Sử dụng nút <span class="highlight">取游戏当前位置信息</span> để tự động lấy tọa độ hiện tại của nhân vật trong game, sau đó chỉnh sửa và nhấn <span class="highlight">添加</span> để thêm điểm mới.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 3.2: 多点挂机 -->
+        <div id="detail-3-2" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 3.2: 多点挂机 (Treo máy đa điểm)</div>
+              <img src="GUI/Detail/3.2.png" alt="挂机设置 3.2">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">多点挂机</span> (Treo máy đa điểm), cho phép bạn thiết lập các điểm treo máy theo lịch trình và loại hoạt động cụ thể, sử dụng bộ tọa độ đa điểm đã được ghi lại.</p>
+              
+              <h4>1. Bảng danh sách cấu hình treo máy</h4>
+              <p>Bảng hiển thị danh sách các cấu hình treo máy đa điểm đã được tạo với các cột:</p>
+              <ul>
+                <li><b>等级</b> → <b>Cấp độ</b>: Cấp độ yêu cầu của nhân vật để thực hiện cấu hình này</li>
+                <li><b>类型</b> → <b>Loại</b>: Loại hoạt động treo máy (ví dụ: thu thập, chiến đấu)</li>
+                <li><b>起始(时)</b> → <b>Bắt đầu (giờ)</b>: Giờ bắt đầu của hoạt động treo máy</li>
+                <li><b>起始(分)</b> → <b>Bắt đầu (phút)</b>: Phút bắt đầu của hoạt động treo máy</li>
+                <li><b>终止(时)</b> → <b>Kết thúc (giờ)</b>: Giờ kết thúc của hoạt động treo máy</li>
+                <li><b>终止(分)</b> → <b>Kết thúc (phút)</b>: Phút kết thúc của hoạt động treo máy</li>
+                <li><b>使用坐标录制名</b> → <b>Tên bộ tọa độ đã ghi</b>: Tên của bộ tọa độ đa điểm được sử dụng cho hoạt động này (được quản lý trong tab "多点坐标")</li>
+                <li><b>备注</b> → <b>Ghi chú</b>: Ghi chú hoặc mô tả thêm về cấu hình</li>
+              </ul>
+              <div class="note">
+                <b>💡 Lưu ý:</b> Bảng này sẽ hiển thị các cấu hình sau khi bạn thêm chúng. Ban đầu bảng có thể trống.
+              </div>
+
+              <h4>2. Khu vực nhập liệu và điều khiển</h4>
+              <p>Các trường để nhập thông tin cho một cấu hình treo máy mới hoặc chỉnh sửa cấu hình hiện có:</p>
+              <ul>
+                <li><b>人物等级</b> → <b>Cấp độ nhân vật</b>: 
+                  <ul>
+                    <li>Ô nhập số để chỉ định cấp độ nhân vật tối thiểu hoặc cụ thể cho hoạt động treo máy này (mặc định: 0)</li>
+                  </ul>
+                </li>
+                <li><b>起始时间</b> → <b>Thời gian bắt đầu</b>:
+                  <ul>
+                    <li>Hai ô nhập số cho giờ và phút (mặc định: 0 : 0)</li>
+                    <li>Thiết lập giờ và phút bắt đầu của hoạt động treo máy</li>
+                  </ul>
+                </li>
+                <li><b>终止时间</b> → <b>Thời gian kết thúc</b>:
+                  <ul>
+                    <li>Hai ô nhập số cho giờ và phút (mặc định: 0 : 0)</li>
+                    <li>Thiết lập giờ và phút kết thúc của hoạt động treo máy</li>
+                  </ul>
+                </li>
+                <li><b>类型</b> → <b>Loại</b>: Dropdown để chọn loại hoạt động treo máy
+                  <ul>
+                    <li>Hiện đang chọn: <b>多点琥珀采集</b> → <b>Thu thập Hổ phách đa điểm</b>: Thu thập Hổ phách tại nhiều điểm</li>
+                    <li>Các tùy chọn khác có thể có trong dropdown này sẽ được giải thích khi bạn mở dropdown</li>
+                  </ul>
+                </li>
+                <li><b>使用多点坐标名</b> → <b>Tên bộ tọa độ đa điểm sử dụng</b>: Dropdown để chọn bộ tọa độ đa điểm
+                  <ul>
+                    <li>Hiện đang chọn: <b>【内置】世界树峡谷1层班</b> → <b>[Tích hợp sẵn] Lớp 1 Thung lũng Cây Thế giới</b>: Bộ tọa độ đa điểm đã được ghi lại hoặc tích hợp sẵn</li>
+                    <li>Các tùy chọn trong dropdown này là các bộ tọa độ đa điểm đã được tạo trong tab "多点坐标" hoặc các bộ tọa độ tích hợp sẵn</li>
+                    <li>Script sẽ sử dụng bộ tọa độ này để di chuyển giữa các điểm treo máy</li>
+                  </ul>
+                </li>
+                <li><b>备注</b> → <b>Ghi chú</b>: 
+                  <ul>
+                    <li>Ô nhập văn bản để thêm ghi chú cho cấu hình treo máy này (mặc định: trống)</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>3. Các nút hành động</h4>
+              <ul>
+                <li><b>添加</b> → <b>Thêm</b>: Thêm cấu hình treo máy mới vào bảng dựa trên thông tin đã nhập trong khu vực nhập liệu</li>
+                <li><b>删除</b> → <b>Xóa</b>: Xóa cấu hình treo máy đã chọn khỏi bảng</li>
+                <li><b>修改</b> → <b>Sửa đổi</b>: Cập nhật thông tin của cấu hình treo máy đã chọn trong bảng bằng dữ liệu từ khu vực nhập liệu</li>
+                <li><b>保存</b> → <b>Lưu</b>: Lưu tất cả các thay đổi và cấu hình treo máy đã thiết lập</li>
+              </ul>
+
+              <div class="note">
+                <b>💡 Mẹo:</b> Bạn cần tạo bộ tọa độ đa điểm trong tab <span class="highlight">多点坐标</span> trước, sau đó quay lại đây để chọn bộ tọa độ đó trong dropdown <span class="highlight">使用多点坐标名</span>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 3.3: 多点坐标 -->
+        <div id="detail-3-3" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 3.3: 多点坐标 (Tọa độ đa điểm)</div>
+              <img src="GUI/Detail/3.3.png" alt="挂机设置 3.3">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">多点坐标</span> (Tọa độ đa điểm), nơi bạn có thể quản lý các tập tin tọa độ để treo máy tại nhiều điểm khác nhau. Giao diện này cho phép bạn tạo, chọn, chỉnh sửa và lưu các danh sách tọa độ.</p>
+              
+              <h4>1. Quản lý tệp tọa độ</h4>
+              <ul>
+                <li><b>新建请填写文件名</b> → <b>Vui lòng nhập tên tệp mới</b>: 
+                  <ul>
+                    <li>Ô nhập tên cho tệp tọa độ mới mà bạn muốn tạo</li>
+                  </ul>
+                </li>
+                <li><b>1.创建新多点坐标文件</b> → <b>1. Tạo tệp tọa độ đa điểm mới</b>: 
+                  <ul>
+                    <li>Nút để tạo một tệp tọa độ mới với tên đã nhập trong ô phía trên</li>
+                  </ul>
+                </li>
+                <li><b>多点坐标文件列表</b> → <b>Danh sách tệp tọa độ đa điểm</b>: 
+                  <ul>
+                    <li>Dropdown để chọn tệp tọa độ hiện có hoặc tích hợp sẵn</li>
+                    <li>Hiện đang chọn: <b>【内置】世界树峡谷1层琥珀</b> → <b>[Tích hợp sẵn] Hổ phách tầng 1 Thung lũng Cây Thế giới</b></li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>2. Các tùy chọn trong dropdown "多点坐标文件列表" (Ảnh 3.3.1)</h4>
+              <p>Dropdown này chứa danh sách các tệp tọa độ đa điểm đã được tạo hoặc tích hợp sẵn:</p>
+              <ul>
+                <li><b>【内置】世界树峡谷1层琥珀</b> → <b>[Tích hợp sẵn] Hổ phách tầng 1 Thung lũng Cây Thế giới</b></li>
+                <li><b>【内置】伊登山谷全图扫描采集</b> → <b>[Tích hợp sẵn] Thung lũng Núi Eden Quét toàn bản đồ và Thu thập</b></li>
+                <li><b>【内置】格拉希尔森林1</b> → <b>[Tích hợp sẵn] Rừng Grasil 1</b></li>
+                <li><b>【内置】洞穴巨人墓地1层</b> → <b>[Tích hợp sẵn] Mộ Người khổng lồ Hang động Tầng 1</b></li>
+                <li><b>【内置】洞穴巨人墓地2层</b> → <b>[Tích hợp sẵn] Mộ Người khổng lồ Hang động Tầng 2</b></li>
+                <li><b>【内置】赫尔莫采集</b> → <b>[Tích hợp sẵn] Thu thập Helmo</b></li>
+                <li><b>【内置】阿斯加德--洞穴巨人遗迹上层</b> → <b>[Tích hợp sẵn] Asgard--Di tích Người khổng lồ Hang động Tầng trên</b></li>
+                <li><b>【内置】阿斯加德--洞穴巨人遗迹下层扫描采集</b> → <b>[Tích hợp sẵn] Asgard--Di tích Người khổng lồ Hang động Tầng dưới Quét và Thu thập</b></li>
+              </ul>
+              <div class="note">
+                <b>💡 Lưu ý:</b> Các tệp có tiền tố <span class="highlight">【内置】</span> (Tích hợp sẵn) là các tệp tọa độ đã được tích hợp sẵn trong tool. Bạn cũng có thể tạo tệp tọa độ mới của riêng mình.
+              </div>
+
+              <h4>3. Bảng danh sách tọa độ</h4>
+              <p>Bảng hiển thị các điểm tọa độ đã được thêm vào tệp hiện tại. Mỗi hàng có một <b>checkbox</b> để chọn/bỏ chọn điểm tọa độ. Các cột bao gồm:</p>
+              <ul>
+                <li><b>地图ID</b> → <b>ID Bản đồ</b>: Mã định danh của bản đồ nơi điểm tọa độ được đặt</li>
+                <li><b>传送点</b> → <b>Điểm dịch chuyển</b>: Mã hoặc ID của điểm dịch chuyển liên quan</li>
+                <li><b>x</b>: Tọa độ X trong không gian game</li>
+                <li><b>y</b>: Tọa độ Y trong không gian game</li>
+                <li><b>z</b>: Tọa độ Z trong không gian game</li>
+                <li><b>备注</b> → <b>Ghi chú</b>: Ghi chú thêm cho điểm tọa độ (ví dụ: tên khu vực, mục đích sử dụng)</li>
+              </ul>
+
+              <h4>4. Khu vực nhập liệu tọa độ mới/chỉnh sửa</h4>
+              <p>Các ô nhập liệu để thêm hoặc chỉnh sửa tọa độ:</p>
+              <ul>
+                <li><b>地图</b> → <b>Bản đồ</b>: Ô nhập số cho ID bản đồ (mặc định: 0)</li>
+                <li><b>传送点</b> → <b>Điểm dịch chuyển</b>: Ô nhập số cho ID điểm dịch chuyển (mặc định: 0)</li>
+                <li><b>x</b>: Ô nhập số cho tọa độ X (mặc định: 0)</li>
+                <li><b>y</b>: Ô nhập số cho tọa độ Y (mặc định: 0)</li>
+                <li><b>z</b>: Ô nhập số cho tọa độ Z (mặc định: 0)</li>
+                <li><b>备注</b> → <b>Ghi chú</b>: Ô nhập văn bản để thêm ghi chú cho điểm tọa độ (ví dụ: tên khu vực, mục đích) (mặc định: trống)</li>
+              </ul>
+
+              <h4>5. Các nút hành động</h4>
+              <ul>
+                <li><b>2.添加游戏当前坐标</b> → <b>2. Thêm tọa độ hiện tại trong game</b>: 
+                  <ul>
+                    <li>Nút này tự động lấy tọa độ hiện tại của nhân vật trong game và thêm vào danh sách</li>
+                    <li>Rất tiện lợi khi bạn đang ở trong game và muốn ghi lại vị trí hiện tại</li>
+                  </ul>
+                </li>
+                <li><b>添加自定坐标</b> → <b>Thêm tọa độ tùy chỉnh</b>: 
+                  <ul>
+                    <li>Thêm một điểm tọa độ mới dựa trên dữ liệu đã nhập thủ công vào các ô nhập liệu phía trên</li>
+                  </ul>
+                </li>
+                <li><b>删除坐标</b> → <b>Xóa tọa độ</b>: 
+                  <ul>
+                    <li>Xóa các điểm tọa độ đã chọn (đã đánh dấu checkbox) trong bảng</li>
+                  </ul>
+                </li>
+                <li><b>修改坐标</b> → <b>Sửa tọa độ</b>: 
+                  <ul>
+                    <li>Chỉnh sửa thông tin của điểm tọa độ đã chọn trong bảng bằng dữ liệu từ khu vực nhập liệu</li>
+                    <li>Chọn một hàng trong bảng, chỉnh sửa thông tin trong các ô nhập liệu, sau đó nhấn nút này</li>
+                  </ul>
+                </li>
+                <li><b>3.保存文件</b> → <b>3. Lưu tệp</b>: 
+                  <ul>
+                    <li>Lưu tất cả các thay đổi vào tệp tọa độ hiện tại (tệp đang được chọn trong dropdown)</li>
+                    <li>Quan trọng: Nhớ nhấn nút này sau khi thực hiện các thay đổi để lưu lại cấu hình</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <div class="warning">
+                <b>⚠️ Lưu ý:</b> Sau khi thêm, sửa hoặc xóa tọa độ, bạn phải nhấn nút <span class="highlight">保存文件</span> để lưu các thay đổi. Nếu không lưu, các thay đổi sẽ bị mất khi đóng cửa sổ.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 3.4: 内置副本 -->
+        <div id="detail-3-4" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 3.4: 内置副本 (Phó bản tích hợp)</div>
+              <img src="GUI/Detail/3.4.png" alt="挂机设置 3.4">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">内置副本</span> (Phó bản tích hợp), nơi bạn có thể cấu hình việc tự động tham gia và hoàn thành các phó bản (dungeon) có sẵn trong game.</p>
+              
+              <h4>1. Cấu hình Phó bản</h4>
+              <ul>
+                <li><b>是否执行内置副本</b> → <b>Có thực hiện phó bản tích hợp không</b>: 
+                  <ul>
+                    <li>Checkbox để bật/tắt chức năng tự động thực hiện phó bản</li>
+                    <li>Khi được bật, tool sẽ tự động tham gia và hoàn thành các phó bản đã được thêm vào danh sách</li>
+                  </ul>
+                </li>
+                <li><b>副本选择</b> → <b>Chọn phó bản</b>: 
+                  <ul>
+                    <li>Dropdown để chọn phó bản muốn thêm vào danh sách</li>
+                    <li>Ví dụ các phó bản có thể chọn: <b>斯瓦帕迷宫</b> → <b>Mê cung Swamp</b>, v.v.</li>
+                  </ul>
+                </li>
+                <li><b>添加</b> → <b>Thêm</b>: 
+                  <ul>
+                    <li>Nút để thêm phó bản đã chọn từ dropdown vào danh sách bên dưới</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>2. Bảng danh sách phó bản</h4>
+              <p>Bảng hiển thị các phó bản đã được thêm vào và cấu hình với các cột:</p>
+              <ul>
+                <li><b>副本名称</b> → <b>Tên phó bản</b>: Tên của phó bản (ví dụ: 斯瓦帕迷宫 - Mê cung Swamp)</li>
+                <li><b>执行次数</b> → <b>Số lần thực hiện</b>: Số lần phó bản này sẽ được thực hiện tự động (có thể chỉnh sửa)</li>
+                <li><b>操作</b> → <b>Thao tác</b>: 
+                  <ul>
+                    <li>Các hành động có thể thực hiện với phó bản trong danh sách</li>
+                    <li><b>删除</b> → <b>Xóa</b>: Xóa phó bản khỏi danh sách</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>3. Cấu hình Viễn chinh tự động</h4>
+              <p>Phần này cho phép bạn thiết lập các tùy chọn liên quan đến viễn chinh (expedition) tự động:</p>
+              <ul>
+                <li><b>自动远征</b> → <b>Viễn chinh tự động</b>: 
+                  <ul>
+                    <li>Dropdown để chọn mục tiêu viễn chinh tự động</li>
+                    <li>Ví dụ: <b>BOSS1[难1]</b> → <b>BOSS1 [Khó 1]</b>: Tự động tham gia viễn chinh BOSS1 ở độ khó 1</li>
+                    <li>Có thể có các tùy chọn khác như BOSS2, BOSS3, v.v. với các độ khó khác nhau</li>
+                  </ul>
+                </li>
+                <li><b>远征15人</b> → <b>Viễn chinh 15 người</b>: 
+                  <ul>
+                    <li>Dropdown để bật/tắt chế độ viễn chinh 15 người</li>
+                    <li>Ví dụ: <b>关闭</b> → <b>Tắt</b>: Không sử dụng chế độ viễn chinh 15 người</li>
+                    <li>Các tùy chọn khác có thể: <b>开启</b> (Bật), v.v.</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <div class="note">
+                <b>💡 Lưu ý:</b> Việc cấu hình phó bản và viễn chinh tự động giúp tối ưu hóa quá trình cày cuốc, thu thập tài nguyên và trang bị. Nhớ bật checkbox <span class="highlight">是否执行内置副本</span> để kích hoạt tính năng.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 3.5: 挂机设置1 -->
+        <div id="detail-3-5" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 3.5: 挂机设置1 (Cài đặt treo máy 1)</div>
+              <img src="GUI/Detail/3.5.png" alt="挂机设置 3.5">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">挂机设置1</span> (Cài đặt treo máy 1), tập trung vào việc tùy chỉnh các điểm thu thập cho nhiệm vụ hàng ngày và các quy tắc liên quan đến số lần chết.</p>
+              
+              <h4>1. Tùy chỉnh điểm thu thập nhiệm vụ hàng ngày</h4>
+              <ul>
+                <li><b>每日任务采集点自定义</b> → <b>Tùy chỉnh điểm thu thập nhiệm vụ hàng ngày</b>: 
+                  <ul>
+                    <li>Dropdown để chọn cấu hình điểm thu thập đã được định nghĩa trước hoặc tùy chỉnh cho các nhiệm vụ hàng ngày</li>
+                    <li>Hiện đang chọn: <b>每日采集坐标3</b> → <b>Tọa độ thu thập hàng ngày 3</b></li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>2. Các tùy chọn trong dropdown "每日任务采集点自定义" (Ảnh 3.5.1)</h4>
+              <p>Dropdown này chứa danh sách các điểm thu thập/treo máy có sẵn:</p>
+              <ul>
+                <li><b>默认内置</b> → <b>Mặc định tích hợp sẵn</b>: Sử dụng cấu hình điểm thu thập mặc định có sẵn trong tool</li>
+                <li><b>每日采集坐标1</b> → <b>Tọa độ thu thập hàng ngày 1</b>: Sử dụng tọa độ thu thập hàng ngày số 1 (được cấu hình trong tab "单点挂机")</li>
+                <li><b>每日采集坐标2</b> → <b>Tọa độ thu thập hàng ngày 2</b>: Sử dụng tọa độ thu thập hàng ngày số 2</li>
+                <li><b>每日采集坐标3</b> → <b>Tọa độ thu thập hàng ngày 3</b>: Sử dụng tọa độ thu thập hàng ngày số 3 (đang được chọn)</li>
+                <li><b>每日采集坐标4</b> → <b>Tọa độ thu thập hàng ngày 4</b>: Sử dụng tọa độ thu thập hàng ngày số 4</li>
+                <li><b>30级怪物挂机点</b> → <b>Điểm treo máy quái vật cấp 30</b>: Sử dụng điểm treo máy quái vật cấp 30 (được cấu hình trong tab "单点挂机")</li>
+              </ul>
+              <div class="note">
+                <b>💡 Lưu ý:</b> Các tọa độ thu thập hàng ngày (每日采集坐标1-4) được cấu hình trong tab <span class="highlight">单点挂机</span>. Bạn cần tạo các điểm này trước khi chọn chúng ở đây.
+              </div>
+
+              <h4>3. Quy tắc số lần chết</h4>
+              <p>Phần này cho phép bạn thiết lập các quy tắc về số lần chết tối đa trước khi thực hiện hành động tự động:</p>
+              <ul>
+                <li><b>委托死亡次数 >=</b> → <b>Số lần chết ủy thác >=</b>: 
+                  <ul>
+                    <li>Ô nhập số để thiết lập ngưỡng số lần chết trong nhiệm vụ ủy thác (mặc định: 1)</li>
+                    <li>Khi số lần chết trong nhiệm vụ ủy thác đạt đến ngưỡng này, tool có thể thực hiện hành động tự động (ví dụ: dừng nhiệm vụ, hồi sinh, hoặc chuyển sang nhiệm vụ khác)</li>
+                  </ul>
+                </li>
+                <li><b>挑战死亡次数 >=</b> → <b>Số lần chết thử thách >=</b>: 
+                  <ul>
+                    <li>Ô nhập số để thiết lập ngưỡng số lần chết trong nhiệm vụ thử thách (mặc định: 1)</li>
+                    <li>Tương tự như trên, khi đạt đến ngưỡng này trong nhiệm vụ thử thách, tool sẽ thực hiện hành động tự động</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <div class="warning">
+                <b>⚠️ Lưu ý:</b> Các thiết lập về số lần chết giúp bảo vệ nhân vật khỏi việc chết quá nhiều lần liên tiếp, giúp tiết kiệm tài nguyên và thời gian. Điều chỉnh các giá trị này phù hợp với cấp độ và trang bị của nhân vật.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 3.6: 挂机设置2 -->
+        <div id="detail-3-6" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 3.6: 挂机设置2 (Cài đặt treo máy 2)</div>
+              <img src="GUI/Detail/3.6.png" alt="挂机设置 3.6">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">挂机设置2</span> (Cài đặt treo máy 2), nơi bạn có thể tinh chỉnh các thiết lập nâng cao liên quan đến tốc độ hành động, phạm vi thu thập và các tùy chọn tự động hóa khác trong quá trình treo máy.</p>
+              
+              <h4>1. Tăng tốc hành động</h4>
+              <ul>
+                <li><b>动作加速[任务]</b> → <b>Tăng tốc hành động [Nhiệm vụ]</b>: 
+                  <ul>
+                    <li>Thanh trượt để điều chỉnh tốc độ thực hiện các nhiệm vụ</li>
+                    <li>Hiển thị: <b>当前倍数:0x</b> → <b>Hệ số hiện tại: 0x</b>: Cho biết mức độ tăng tốc đang được áp dụng</li>
+                    <li>Tăng giá trị này sẽ làm cho nhân vật thực hiện nhiệm vụ nhanh hơn</li>
+                  </ul>
+                </li>
+                <li><b>动作加速[挂机]</b> → <b>Tăng tốc hành động [Treo máy]</b>: 
+                  <ul>
+                    <li>Thanh trượt để điều chỉnh tốc độ các hành động khi treo máy (AFK)</li>
+                    <li>Hiển thị: <b>当前倍数:0x</b> → <b>Hệ số hiện tại: 0x</b>: Cho biết mức độ tăng tốc đang được áp dụng</li>
+                    <li>Tăng giá trị này sẽ làm cho nhân vật thực hiện các hành động treo máy nhanh hơn</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>2. Phạm vi thu thập</h4>
+              <ul>
+                <li><b>采集范围</b> → <b>Phạm vi thu thập</b>: 
+                  <ul>
+                    <li>Ô nhập số với giá trị mặc định là <b>1000</b>, theo sau là đơn vị <b>米[填0忽略]</b> → <b>mét [điền 0 để bỏ qua]</b></li>
+                    <li>Thiết lập phạm vi mà nhân vật sẽ tự động thu thập vật phẩm hoặc tài nguyên</li>
+                    <li>Nếu điền 0, có thể có nghĩa là không giới hạn hoặc sử dụng phạm vi mặc định của script</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>3. Các tùy chọn tự động hóa (Checkboxes)</h4>
+              <ul>
+                <li><b>采集瞬移</b> → <b>Thu thập dịch chuyển tức thời</b>: 
+                  <ul>
+                    <li>Checkbox: Khi được chọn, nhân vật có thể dịch chuyển tức thời đến vị trí vật phẩm để thu thập</li>
+                    <li>Giúp tiết kiệm thời gian di chuyển khi thu thập</li>
+                  </ul>
+                </li>
+                <li><b>试炼BOSS加速</b> → <b>Tăng tốc BOSS Thử thách</b>: 
+                  <ul>
+                    <li>Checkbox: Khi được chọn, có thể tăng tốc độ chiến đấu hoặc bỏ qua một số hoạt ảnh khi đối phó với BOSS trong các thử thách</li>
+                    <li>Giúp hoàn thành thử thách BOSS nhanh hơn</li>
+                  </ul>
+                </li>
+                <li><b>剧情副本直接完成</b> → <b>Hoàn thành trực tiếp Phó bản cốt truyện</b>: 
+                  <ul>
+                    <li>Checkbox (đang được đánh dấu): Khi được chọn, các phó bản cốt truyện có thể được hoàn thành ngay lập tức hoặc bỏ qua các bước không cần thiết</li>
+                    <li>Tiết kiệm thời gian khi làm nhiệm vụ cốt truyện</li>
+                  </ul>
+                </li>
+                <li><b>自动进入世界BOSS</b> → <b>Tự động vào BOSS Thế giới</b>: 
+                  <ul>
+                    <li>Checkbox (đang được đánh dấu): Khi được chọn, nhân vật sẽ tự động tham gia các sự kiện BOSS Thế giới khi chúng xuất hiện</li>
+                    <li>Không cần can thiệp thủ công để tham gia sự kiện</li>
+                  </ul>
+                </li>
+                <li><b>使用脚本自带采集[使用脚本采集才支持下面分类采集]</b> → <b>Sử dụng tính năng thu thập của script [Chỉ khi sử dụng tính năng thu thập của script mới hỗ trợ phân loại thu thập bên dưới]</b>: 
+                  <ul>
+                    <li>Checkbox: Khi được chọn, script sẽ sử dụng hệ thống thu thập riêng của nó</li>
+                    <li>Mở khóa các tùy chọn phân loại thu thập bên dưới (phần 4)</li>
+                    <li>Nếu không bật checkbox này, các tùy chọn phân loại thu thập bên dưới sẽ không hoạt động</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>4. Phân loại thu thập</h4>
+              <p>Phần này chỉ hoạt động khi tùy chọn <span class="highlight">使用脚本自带采集</span> được bật:</p>
+              <ul>
+                <li><b>宝箱</b> → <b>Rương báu</b>: 
+                  <ul>
+                    <li>Checkbox: Khi được chọn, script sẽ ưu tiên thu thập rương báu</li>
+                  </ul>
+                </li>
+                <li><b>药草</b> → <b>Thảo dược</b>: 
+                  <ul>
+                    <li>Checkbox: Khi được chọn, script sẽ ưu tiên thu thập thảo dược</li>
+                  </ul>
+                </li>
+                <li><b>宝石</b> → <b>Đá quý</b>: 
+                  <ul>
+                    <li>Checkbox: Khi được chọn, script sẽ ưu tiên thu thập đá quý</li>
+                  </ul>
+                </li>
+                <li><b>矿石</b> → <b>Quặng</b>: 
+                  <ul>
+                    <li>Checkbox: Khi được chọn, script sẽ ưu tiên thu thập quặng</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <div class="note">
+                <b>💡 Mẹo:</b> Các thiết lập tăng tốc có thể giúp tăng hiệu quả treo máy, nhưng cần cẩn thận để tránh bị phát hiện bởi hệ thống chống bot của game. Điều chỉnh phù hợp với nhu cầu của bạn.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab 3.7: 挂机保护 -->
+        <div id="detail-3-7" class="tab-content">
+          <div class="card image-section">
+            <div class="image-wrapper">
+              <div class="image-title">Ảnh 3.7: 挂机保护 (Bảo vệ treo máy)</div>
+              <img src="GUI/Detail/3.7.png" alt="挂机设置 3.7">
+            </div>
+            <div class="description-wrapper">
+              <h3>Giải thích:</h3>
+              <p>Đây là tab <span class="highlight">挂机保护</span> (Bảo vệ treo máy), nơi bạn có thể thiết lập các quy tắc tự động để bảo vệ nhân vật khi treo máy, dựa trên lượng máu và số lượng bạc.</p>
+              
+              <h4>1. 挂机保护 (Bảo vệ treo máy)</h4>
+              <p>Phần này cho phép bạn thiết lập các quy tắc tự động bảo vệ nhân vật dựa trên lượng máu:</p>
+              <ul>
+                <li><b>生命低于%</b> → <b>Máu dưới %</b>: 
+                  <ul>
+                    <li>Ô nhập số với giá trị mặc định là <b>25</b></li>
+                    <li>Theo sau là: <b>使用瞬移回城[填0关闭]</b> → <b>Sử dụng dịch chuyển tức thời về thành [điền 0 để tắt]</b></li>
+                    <li>Nếu máu nhân vật giảm xuống dưới <b>25%</b>, hệ thống sẽ tự động sử dụng vật phẩm dịch chuyển tức thời để về thành</li>
+                    <li>Điền <b>0</b> vào ô này để tắt chức năng</li>
+                  </ul>
+                </li>
+                <li><b>生命低于%</b> → <b>Máu dưới %</b>: 
+                  <ul>
+                    <li>Ô nhập số với giá trị mặc định là <b>90</b></li>
+                    <li>Theo sau là: <b>自动使用红药[填0默认90]</b> → <b>Tự động sử dụng thuốc đỏ [điền 0 mặc định 90]</b></li>
+                    <li>Nếu máu nhân vật giảm xuống dưới <b>90%</b>, hệ thống sẽ tự động sử dụng thuốc đỏ (red potion) để hồi máu</li>
+                    <li>Điền <b>0</b> để tắt chức năng, <b>90</b> là giá trị mặc định</li>
+                  </ul>
+                </li>
+                <li><b>生命低于%</b> → <b>Máu dưới %</b>: 
+                  <ul>
+                    <li>Ô nhập số thứ nhất với giá trị mặc định là <b>0</b></li>
+                    <li>Theo sau là: <b>暂停挂机和自动任务直到生命高于%</b> → <b>Tạm dừng treo máy và nhiệm vụ tự động cho đến khi máu trên %</b></li>
+                    <li>Ô nhập số thứ hai với giá trị mặc định là <b>0</b></li>
+                    <li>Nếu máu nhân vật giảm xuống dưới ngưỡng thứ nhất (ví dụ: <b>0%</b> hoặc một ngưỡng rất thấp), hệ thống sẽ tạm dừng tất cả các hoạt động treo máy và nhiệm vụ tự động</li>
+                    <li>Các hoạt động sẽ tiếp tục khi máu nhân vật hồi phục lên trên ngưỡng thứ hai (ví dụ: <b>0%</b> hoặc ngưỡng bạn đặt)</li>
+                    <li>Thiết lập này giúp bảo vệ nhân vật khỏi việc chết liên tiếp</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h4>2. 金币保护 (Bảo vệ tiền vàng/bạc)</h4>
+              <p>Phần này cho phép bạn thiết lập quy tắc tự động bảo vệ và kiếm tiền dựa trên số lượng bạc trên người:</p>
+              <ul>
+                <li><b>当身上银币<=</b> → <b>Khi bạc trên người <=</b>: 
+                  <ul>
+                    <li>Ô nhập số với giá trị mặc định là <b>100000</b> (100,000 bạc)</li>
+                  </ul>
+                </li>
+                <li><b>时,自动前往</b> → <b>, tự động đến</b>: 
+                  <ul>
+                    <li>Dropdown để chọn điểm đến khi kích hoạt bảo vệ</li>
+                    <li>Hiện đang chọn: <b>随机默认挂机点</b> → <b>Điểm treo máy mặc định ngẫu nhiên</b></li>
+                    <li>Các tùy chọn khác có thể có trong dropdown này sẽ được hiển thị khi bạn mở dropdown</li>
+                  </ul>
+                </li>
+                <li><b>挂机 直到银币 >=</b> → <b>Treo máy cho đến khi bạc >=</b>: 
+                  <ul>
+                    <li>Ô nhập số với giá trị mặc định là <b>1000000</b> (1,000,000 bạc)</li>
+                  </ul>
+                </li>
+                <li><b>Giải thích toàn bộ quy tắc:</b>
+                  <ul>
+                    <li>Nếu số lượng bạc trên người nhân vật giảm xuống <b>100,000</b> hoặc thấp hơn, nhân vật sẽ tự động di chuyển đến một <b>điểm treo máy mặc định ngẫu nhiên</b> (hoặc điểm bạn chọn trong dropdown)</li>
+                    <li>Nhân vật sẽ tiếp tục treo máy tại điểm đó cho đến khi số lượng bạc trên người đạt <b>1,000,000</b> hoặc cao hơn</li>
+                    <li>Thiết lập này giúp đảm bảo nhân vật luôn có đủ bạc để mua vật phẩm và thực hiện các hoạt động cần thiết</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <div class="warning">
+                <b>⚠️ Cảnh báo:</b> Các thiết lập bảo vệ này rất quan trọng để tránh nhân vật chết hoặc hết tiền khi treo máy. Hãy điều chỉnh các ngưỡng phù hợp với cấp độ và trang bị của nhân vật.
+              </div>
+
+              <div class="note">
+                <b>💡 Mẹo:</b> Đặt ngưỡng máu thấp hơn cho "使用瞬移回城" (ví dụ: 25%) và ngưỡng cao hơn cho "自动使用红药" (ví dụ: 90%) để tối ưu việc sử dụng vật phẩm. Đối với bảo vệ bạc, đặt ngưỡng dưới và trên phù hợp với nhu cầu chi tiêu của bạn.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Tab 4: Cài đặt bang hội -->
+      <div id="detail-4" class="tab-content">
+        <h3>Cài đặt bang hội (公会设置)</h3>
+        <p style="margin-bottom: 24px;">Phần này hướng dẫn cách cấu hình các thiết lập liên quan đến bang hội (guild), bao gồm thao tác bang hội, nhiệm vụ hàng ngày và cửa hàng bang hội.</p>
+
+        <div class="card image-section">
+          <div class="image-wrapper">
+            <div class="image-title">Ảnh 4: 公会设置 (Cài đặt bang hội)</div>
+            <img src="GUI/Detail/4.png" alt="公会设置 4">
+          </div>
+          <div class="description-wrapper">
+            <h3>Giải thích:</h3>
+            <p>Đây là tab <span class="highlight">公会设置</span> (Cài đặt bang hội), nơi bạn có thể cấu hình các thiết lập liên quan đến bang hội, bao gồm thao tác bang hội, nhiệm vụ hàng ngày và mua hàng tại cửa hàng bang hội.</p>
+            
+            <h4>1. 公会操作 (Thao tác bang hội)</h4>
+            <ul>
+              <li><b>公会选择</b> → <b>Chọn bang hội</b>: 
+                <ul>
+                  <li>Dropdown để chọn thao tác liên quan đến bang hội</li>
+                  <li>Hiện đang chọn: <b>不操作</b> → <b>Không thao tác</b>: Không thực hiện bất kỳ thao tác nào với bang hội</li>
+                  <li>Các tùy chọn khác có thể có: Tham gia bang hội, Rời bang hội, Tạo bang hội, v.v.</li>
+                </ul>
+              </li>
+              <li><b>公会名</b> → <b>Tên bang hội</b>: 
+                <ul>
+                  <li>Ô nhập văn bản để nhập tên bang hội (mặc định: trống)</li>
+                  <li>Dùng khi cần tìm kiếm, tham gia hoặc tạo bang hội cụ thể</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h4>2. 公会每日 (Nhiệm vụ bang hội hàng ngày)</h4>
+            <p>Các checkbox để tự động thực hiện các nhiệm vụ bang hội hàng ngày:</p>
+            <ul>
+              <li><b>银币捐献</b> → <b>Quyên góp bạc</b>: 
+                <ul>
+                  <li>Checkbox: Khi được chọn, tự động quyên góp bạc cho bang hội mỗi ngày</li>
+                </ul>
+              </li>
+              <li><b>琥珀捐献</b> → <b>Quyên góp Hổ phách</b>: 
+                <ul>
+                  <li>Checkbox: Khi được chọn, tự động quyên góp Hổ phách cho bang hội mỗi ngày</li>
+                </ul>
+              </li>
+              <li><b>升级技能</b> → <b>Nâng cấp kỹ năng</b>: 
+                <ul>
+                  <li>Checkbox: Khi được chọn, tự động nâng cấp kỹ năng bang hội khi có đủ tài nguyên</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h4>3. 公会商店 (Cửa hàng bang hội)</h4>
+            <p>Các checkbox để tự động mua vật phẩm từ cửa hàng bang hội:</p>
+            
+            <p><b>Hàng 1 - Vật liệu cấp thấp:</b></p>
+            <ul>
+              <li><b>下级钢铁</b> → <b>Thép cấp thấp</b>: Checkbox để tự động mua thép cấp thấp</li>
+              <li><b>下级亚麻</b> → <b>Lanh cấp thấp</b>: Checkbox để tự động mua lanh cấp thấp</li>
+              <li><b>下级宝石</b> → <b>Đá quý cấp thấp</b>: Checkbox để tự động mua đá quý cấp thấp</li>
+              <li><b>下级部件</b> → <b>Linh kiện cấp thấp</b>: Checkbox để tự động mua linh kiện cấp thấp</li>
+            </ul>
+
+            <p><b>Hàng 2 - Vật liệu và đá nâng cấp:</b></p>
+            <ul>
+              <li><b>下级研磨剂</b> → <b>Chất mài cấp thấp</b>: Checkbox để tự động mua chất mài cấp thấp</li>
+              <li><b>武器强化石</b> → <b>Đá nâng cấp vũ khí</b>: Checkbox để tự động mua đá nâng cấp vũ khí</li>
+              <li><b>防具强化石</b> → <b>Đá nâng cấp giáp</b>: Checkbox để tự động mua đá nâng cấp giáp</li>
+              <li><b>首饰强化石</b> → <b>Đá nâng cấp trang sức</b>: Checkbox để tự động mua đá nâng cấp trang sức</li>
+              <li><b>生活强化石</b> → <b>Đá nâng cấp sinh hoạt</b>: Checkbox để tự động mua đá nâng cấp sinh hoạt</li>
+            </ul>
+
+            <div class="note">
+              <b>💡 Lưu ý:</b> Các thiết lập này giúp tự động hóa các hoạt động bang hội, giúp bạn không bỏ lỡ các nhiệm vụ hàng ngày và tận dụng tốt cửa hàng bang hội.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Tab 5: Cài đặt đấu giá -->
+      <div id="detail-5" class="tab-content">
+        <h3>Cài đặt đấu giá (拍卖设置)</h3>
+        <p style="margin-bottom: 24px;">Phần này hướng dẫn cách cấu hình tự động đấu giá, bao gồm tự động đăng bán, tự động hạ giá và quản lý danh sách vật phẩm đấu giá.</p>
+
+        <div class="card image-section">
+          <div class="image-wrapper">
+            <div class="image-title">Ảnh 5: 拍卖设置 (Cài đặt đấu giá)</div>
+            <img src="GUI/Detail/5.png" alt="拍卖设置 5">
+          </div>
+          <div class="description-wrapper">
+            <h3>Giải thích:</h3>
+            <p>Đây là tab <span class="highlight">拍卖设置</span> (Cài đặt đấu giá), nơi bạn có thể cấu hình tự động đấu giá, bao gồm tự động đăng bán vật phẩm, tự động hạ giá và quản lý danh sách vật phẩm đấu giá.</p>
+            
+            <h4>1. Bật/tắt và cài đặt chung</h4>
+            <ul>
+              <li><b>开启自动拍卖</b> → <b>Bật đấu giá tự động</b>: 
+                <ul>
+                  <li>Checkbox (đang được đánh dấu): Khi được chọn, kích hoạt tính năng tự động đấu giá</li>
+                  <li>Chỉ khi checkbox này được bật, các thiết lập phía dưới mới có hiệu lực</li>
+                </ul>
+              </li>
+              <li><b>上线后每隔 [Số] 小时,执行拍卖操作,填0表示只在上号的时候执行一次上架操作</b> → <b>Sau khi đăng nhập, mỗi [Số] giờ, thực hiện thao tác đấu giá, điền 0 nghĩa là chỉ thực hiện thao tác đăng bán một lần khi đăng nhập</b>: 
+                <ul>
+                  <li>Ô nhập số với giá trị mặc định là <b>1</b></li>
+                  <li>Thiết lập chu kỳ tự động thực hiện thao tác đấu giá (ví dụ: 1 giờ)</li>
+                  <li>Điền <b>0</b> để chỉ đăng bán một lần khi đăng nhập, không lặp lại</li>
+                </ul>
+              </li>
+              <li><b>上架剩余 [Số] 小时还未卖出,自动下架</b> → <b>Đăng bán còn lại [Số] giờ chưa bán được, tự động hạ giá</b>: 
+                <ul>
+                  <li>Ô nhập số với giá trị mặc định là <b>12</b></li>
+                  <li>Nếu vật phẩm đã đăng bán <b>12</b> giờ mà chưa bán được, tự động hạ giá hoặc gỡ xuống</li>
+                </ul>
+              </li>
+              <li><b>智能上架模式[不在下列清单的将自动识别进行拍卖]</b> → <b>Chế độ đăng bán thông minh [Vật phẩm không trong danh sách dưới đây sẽ tự động được nhận diện và đấu giá]</b>: 
+                <ul>
+                  <li>Checkbox (đang được đánh dấu): Khi được chọn, tool sẽ tự động nhận diện và đấu giá các vật phẩm không có trong danh sách quản lý bên dưới</li>
+                  <li>Giúp tự động hóa hoàn toàn quá trình đấu giá</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h4>2. Khu vực quản lý vật phẩm đấu giá</h4>
+            <p>Giao diện được chia thành 2 phần: Bên trái (Tìm kiếm/Chọn vật phẩm) và Bên phải (Danh sách vật phẩm đấu giá).</p>
+
+            <p><b>Bên trái - Tìm kiếm/Chọn vật phẩm:</b></p>
+            <ul>
+              <li><b>读取背包</b> → <b>Đọc túi</b>: 
+                <ul>
+                  <li>Nút để đọc danh sách vật phẩm từ túi và hiển thị trong bảng bên trái</li>
+                </ul>
+              </li>
+              <li><b>Bảng hiển thị vật phẩm</b> với các cột:
+                <ul>
+                  <li><b>物品ID</b> → <b>ID vật phẩm</b>: Mã định danh vật phẩm</li>
+                  <li><b>物品名</b> → <b>Tên vật phẩm</b>: Tên vật phẩm</li>
+                  <li><b>强化</b> → <b>Nâng cấp</b>: Mức độ nâng cấp của vật phẩm</li>
+                </ul>
+              </li>
+              <li><b>搜索</b> → <b>Tìm kiếm</b>: 
+                <ul>
+                  <li>Nút tìm kiếm vật phẩm</li>
+                </ul>
+              </li>
+              <li><b>Ô nhập liệu</b>: Ô nhập để tìm kiếm vật phẩm (ví dụ: theo tên)</li>
+              <li><b>Hiển thị thông tin:</b>
+                <ul>
+                  <li><b>当前查询: 胡萝卜</b> → <b>Truy vấn hiện tại: Cà rốt</b></li>
+                  <li><b>强化值: 0</b> → <b>Giá trị nâng cấp: 0</b></li>
+                  <li><b>最近价: 0.00</b> → <b>Giá gần đây: 0.00</b></li>
+                </ul>
+              </li>
+              <li><b>询价 --></b> → <b>Hỏi giá --></b>: Nút để tra cứu giá thị trường của vật phẩm</li>
+              <li><b><-- 询价</b> → <b><-- Hỏi giá</b>: Nút để tra cứu giá (có thể là hướng ngược lại)</li>
+            </ul>
+
+            <p><b>Bên phải - Danh sách vật phẩm đấu giá:</b></p>
+            <ul>
+              <li><b>Bảng danh sách vật phẩm đấu giá</b> với các cột:
+                <ul>
+                  <li><b>物品ID</b> → <b>ID vật phẩm</b></li>
+                  <li><b>物品名</b> → <b>Tên vật phẩm</b></li>
+                  <li><b>强化</b> → <b>Nâng cấp</b></li>
+                  <li><b>比最低价贵</b> → <b>Đắt hơn giá thấp nhất</b>: Chênh lệch giá so với giá thấp nhất trên thị trường</li>
+                  <li><b>一口价(单价)</b> → <b>Giá mua ngay (đơn giá)</b>: Giá mua ngay cho mỗi đơn vị</li>
+                  <li><b>上架数量</b> → <b>Số lượng đăng bán</b>: Số lượng vật phẩm sẽ được đăng bán</li>
+                </ul>
+              </li>
+              <li><b>Khu vực nhập liệu:</b>
+                <ul>
+                  <li><b>比最低价贵 [0]</b> → <b>Đắt hơn giá thấp nhất [0]</b>: Ô nhập số để đặt chênh lệch giá so với giá thấp nhất (mặc định: 0)</li>
+                  <li><b>一口价 [0]</b> → <b>Giá mua ngay [0]</b>: Ô nhập số để đặt giá mua ngay (mặc định: 0)</li>
+                  <li><b>数量 [0]</b> → <b>Số lượng [0]</b>: Ô nhập số để đặt số lượng đăng bán (mặc định: 0)</li>
+                </ul>
+              </li>
+              <li><b>Các nút hành động:</b>
+                <ul>
+                  <li><b>添加</b> → <b>Thêm</b>: Thêm vật phẩm vào danh sách đấu giá với thông tin đã nhập</li>
+                  <li><b>删除</b> → <b>Xóa</b>: Xóa vật phẩm đã chọn khỏi danh sách đấu giá</li>
+                  <li><b>修改</b> → <b>Sửa</b>: Sửa thông tin vật phẩm đã chọn trong danh sách</li>
+                  <li><b>保存</b> → <b>Lưu</b>: Lưu tất cả các thay đổi trong danh sách đấu giá</li>
+                </ul>
+              </li>
+            </ul>
+
+            <div class="note">
+              <b>💡 Mẹo:</b> Sử dụng nút <span class="highlight">询价</span> để tra cứu giá thị trường trước khi đặt giá, giúp đặt giá hợp lý và bán nhanh hơn.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Tab 6: Cài đặt tổ đội -->
+      <div id="detail-6" class="tab-content">
+        <h3>Cài đặt tổ đội (组队设置)</h3>
+        <p style="margin-bottom: 24px;">Phần này hướng dẫn cách cấu hình các thiết lập liên quan đến tổ đội (team), bao gồm chế độ tổ đội, số lượng thành viên và các tùy chọn tự động.</p>
+
+        <div class="card image-section">
+          <div class="image-wrapper">
+            <div class="image-title">Ảnh 6: 组队设置 (Cài đặt tổ đội)</div>
+            <img src="GUI/Detail/6.png" alt="组队设置 6">
+          </div>
+          <div class="description-wrapper">
+            <h3>Giải thích:</h3>
+            <p>Đây là tab <span class="highlight">组队设置</span> (Cài đặt tổ đội), nơi bạn có thể cấu hình các thiết lập liên quan đến tổ đội, bao gồm chế độ tổ đội, số lượng thành viên, vai trò và các tùy chọn tự động.</p>
+            
+            <h4>1. Cài đặt cơ bản tổ đội</h4>
+            <ul>
+              <li><b>模式</b> → <b>Chế độ</b>: 
+                <ul>
+                  <li>Dropdown để chọn chế độ tổ đội</li>
+                  <li>Hiện đang chọn: <b>关闭组队</b> → <b>Tắt tổ đội</b>: Không tham gia hoặc tạo tổ đội</li>
+                  <li>Các tùy chọn khác có thể có: Tự động tham gia tổ đội, Tự động tạo tổ đội, v.v.</li>
+                </ul>
+              </li>
+              <li><b>组队人数</b> → <b>Số lượng thành viên tổ đội</b>: 
+                <ul>
+                  <li>Dropdown để chọn số lượng thành viên trong tổ đội</li>
+                  <li>Hiện đang chọn: <b>5人</b> → <b>5 người</b>: Tổ đội gồm 5 thành viên</li>
+                  <li>Các tùy chọn khác có thể: 3人 (3 người), 4人 (4 người), v.v.</li>
+                </ul>
+              </li>
+              <li><b>是否队长</b> → <b>Có phải đội trưởng không</b>: 
+                <ul>
+                  <li>Checkbox (chưa được đánh dấu): Khi được chọn, nhân vật sẽ tự động làm đội trưởng</li>
+                  <li>Nếu không chọn, nhân vật sẽ là thành viên thường</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h4>2. Cài đặt mật khẩu tổ đội</h4>
+            <ul>
+              <li><b>组队密匙</b> → <b>Mật khẩu tổ đội</b>: 
+                <ul>
+                  <li>Ô nhập văn bản để nhập mật khẩu tổ đội (mặc định: trống)</li>
+                  <li>Mô tả bên cạnh: <b>任意中英文数字都支持 长度可以很长</b> → <b>Hỗ trợ bất kỳ chữ Trung, Anh, số nào, độ dài có thể rất dài</b></li>
+                  <li>Dùng để tham gia hoặc tạo tổ đội có mật khẩu</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h4>3. Cài đặt nâng cao</h4>
+            <ul>
+              <li><b>队长创建队伍前选择流畅频道</b> → <b>Đội trưởng chọn kênh mượt trước khi tạo tổ đội</b>: 
+                <ul>
+                  <li>Checkbox (chưa được đánh dấu): Khi được chọn, đội trưởng sẽ tự động chọn kênh có độ trễ thấp (mượt) trước khi tạo tổ đội</li>
+                  <li>Giúp đảm bảo kết nối tốt cho cả tổ đội</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h4>4. Các tùy chọn tự động trong tổ đội</h4>
+            <ul>
+              <li><b>人齐开怪</b> → <b>Đủ người mới bắt đầu đánh quái</b>: 
+                <ul>
+                  <li>Checkbox (chưa được đánh dấu): Khi được chọn, chỉ khi đủ số lượng thành viên trong tổ đội thì mới bắt đầu đánh quái</li>
+                  <li>Tránh bắt đầu sớm khi chưa đủ người</li>
+                </ul>
+              </li>
+              <li><b>是否集火</b> → <b>Có tập trung tấn công không</b>: 
+                <ul>
+                  <li>Checkbox (chưa được đánh dấu): Khi được chọn, các thành viên sẽ tự động tập trung tấn công cùng một mục tiêu (focus fire)</li>
+                  <li>Giúp tiêu diệt quái nhanh hơn và hiệu quả hơn</li>
+                </ul>
+              </li>
+              <li><b>紧跟队长</b> → <b>Theo sát đội trưởng</b>: 
+                <ul>
+                  <li>Checkbox (chưa được đánh dấu): Khi được chọn, nhân vật sẽ tự động di chuyển theo sát đội trưởng</li>
+                  <li>Giúp giữ tổ đội gần nhau và không bị lạc</li>
+                </ul>
+              </li>
+            </ul>
+
+            <div class="note">
+              <b>💡 Lưu ý:</b> Các thiết lập tổ đội giúp tự động hóa việc tham gia và hoạt động trong tổ đội, giúp farm hiệu quả hơn. Nhớ điều chỉnh các tùy chọn phù hợp với vai trò của nhân vật (đội trưởng hoặc thành viên).
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Scroll to Top
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollToTop');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('show');
+      } else {
+        scrollBtn.classList.remove('show');
+      }
+    });
+
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+
+    function showMainTab(tabName) {
+      // Chỉ ẩn main tab content (preview và detail), không ẩn detail sub-tabs
+      document.querySelectorAll('#preview, #detail').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Ẩn active class từ tất cả main nav tabs
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Hiển thị main tab được chọn
+      const targetTab = document.getElementById(tabName);
+      targetTab.classList.add('active');
+      
+      // Active button tương ứng
+      event.target.classList.add('active');
+    }
+
+    function showDetailTab(tabName) {
+      // Chỉ ẩn các detail sub-tab content (detail-1, detail-2, etc.)
+      document.querySelectorAll('[id^="detail-"]').forEach(tab => {
+        const parts = tab.id.split('-');
+        // Ẩn chỉ các tab cấp 1: detail-1 .. detail-6
+        if (parts.length === 2) {
+          tab.classList.remove('active');
+        }
+      });
+      
+      // Ẩn active class từ tất cả sub nav tabs
+      document.querySelectorAll('.sub-nav-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Hiển thị detail tab được chọn
+      const targetTab = document.getElementById(tabName);
+      targetTab.classList.add('active');
+      
+      // Active button tương ứng
+      event.target.classList.add('active');
+    }
+
+    function showSubTab(tabName) {
+      // Chỉ ẩn các sub-tab content trong cùng main tab (detail-2-1, detail-2-2, etc.)
+      const mainTabId = tabName.split('-').slice(0, 2).join('-'); // Lấy "detail-2"
+      const subTabs = document.querySelectorAll(`[id^="${mainTabId}-"]`);
+      subTabs.forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Ẩn active class từ tất cả sub-nav-tab trong cùng main tab
+      const mainTab = document.getElementById(mainTabId);
+      if (mainTab) {
+        const subNavTabs = mainTab.querySelectorAll('.sub-nav-tab');
+        subNavTabs.forEach(btn => {
+          btn.classList.remove('active');
+        });
+      }
+      
+      // Hiển thị sub-tab được chọn
+      const targetTab = document.getElementById(tabName);
+      targetTab.classList.add('active');
+      
+      // Active button tương ứng
+      event.target.classList.add('active');
+    }
+    
+    // Anti-copy & anti-screenshot (best-effort)
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+    document.addEventListener('copy', function(e) {
+      e.preventDefault();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText('');
+      }
+    });
+    document.addEventListener('keydown', function(e) {
+      const key = (e.key || '').toLowerCase();
+      // Block common combos: copy, save, view-source, print, select-all
+      if (e.ctrlKey && ['c','s','u','p','a'].includes(key)) { e.preventDefault(); }
+      // DevTools
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i','c','j'].includes(key))) { e.preventDefault(); }
+      // Attempt to block PrintScreen
+      if (e.key === 'PrintScreen') { e.preventDefault(); if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(''); } }
+    });
+    window.addEventListener('beforeprint', function() { document.body.style.display = 'none'; });
+    window.addEventListener('afterprint', function() { document.body.style.display = ''; });
+
+    // Watermark background (discourages screenshots)
+    (function applyWatermark(){
+      try {
+        const canvas = document.createElement('canvas');
+        const sizeX = 340, sizeY = 240;
+        canvas.width = sizeX; canvas.height = sizeY;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0,0,sizeX,sizeY);
+        ctx.save();
+        ctx.translate(sizeX/2, sizeY/2);
+        ctx.rotate(-Math.PI/6);
+        ctx.globalAlpha = 0.08;
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 18px Segoe UI, Arial';
+        const text = 'YMIR GUIDE — ' + new Date().toISOString();
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+        const data = canvas.toDataURL('image/png');
+        document.body.style.backgroundImage = 'url(' + data + ')';
+        document.body.style.backgroundRepeat = 'repeat';
+      } catch(_){}
+    })();
+  </script>
+</body>
+</html>
