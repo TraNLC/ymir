@@ -466,15 +466,11 @@
   }
   function afterLogin(user){ 
     setWatermark(user); 
-    if(user==='admin'){ 
-      const panel=document.getElementById('admin-panel'); 
-      if(panel) panel.style.display='block'; 
-      if(location.search.indexOf('admin=1')===-1){ 
-        history.replaceState({},'',location.pathname+'?admin=1'); 
-      }
-      // Gọi lại để ẩn nội dung hướng dẫn
-      showAdminIfRequested();
-    } 
+    if(user==='admin'){
+      // Chuyển hẳn sang trang admin riêng
+      window.location.href = 'admin.html';
+      return;
+    }
   }
   function setWatermark(text){
     const wm=document.createElement('div'); wm.className='wm'; wm.textContent=(text||'')+' | '+new Date().toLocaleString();
@@ -488,36 +484,8 @@
   function showAdminIfRequested(){
     const params = new URLSearchParams(location.search);
     if(params.get('admin') === '1'){
-      // Thêm class admin-mode cho body
-      document.body.classList.add('admin-mode');
-      
-      // Hiển thị admin panel
-      const panel = document.getElementById('admin-panel');
-      if(panel) panel.style.display = 'block';
-      
-      // Hiển thị admin header
-      const adminHeader = document.getElementById('admin-header');
-      if(adminHeader) adminHeader.style.display = 'block';
-      
-      // Ẩn tất cả nội dung hướng dẫn
-      const header = document.querySelector('.header');
-      const scrollBtn = document.getElementById('scrollToTop');
-      const navTabs = document.querySelector('.nav-tabs');
-      const tabContents = document.querySelectorAll('.tab-content');
-      
-      if(header) header.style.display = 'none';
-      if(scrollBtn) scrollBtn.style.display = 'none';
-      if(navTabs) navTabs.style.display = 'none';
-      tabContents.forEach(tab => tab.style.display = 'none');
-      
-      // Thay đổi title
-      document.title = 'Admin — Quản lý IP truy cập';
-    } else {
-      // Xóa class admin-mode nếu không phải admin mode
-      document.body.classList.remove('admin-mode');
-      // Ẩn admin header
-      const adminHeader = document.getElementById('admin-header');
-      if(adminHeader) adminHeader.style.display = 'none';
+      // Chuyển sang trang admin tách biệt
+      window.location.replace('admin.html');
     }
   }
   function getAdminToken(){ return document.getElementById('adm-token').value.trim(); }

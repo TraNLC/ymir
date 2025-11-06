@@ -12,9 +12,17 @@ body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   background: var(--bg);
+  background-image: none !important; /* ensure no patterned stripes */
   color: var(--text);
   line-height: 1.6;
   padding-top: 80px; /* Space for fixed header */
+}
+/* force-remove any decorative stripe/watermark layers */
+body::before, body::after,
+.watermark, .bg-grid, .diagonal-lines, .wm-overlay {
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
 }
 /* Anti-copy basics */
 body, .container, .card, .description-wrapper, .image-title, h1, h2, h3, h4, p, li {

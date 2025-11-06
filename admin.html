@@ -79,7 +79,7 @@
     const token = getBearer();
     const tbody = document.getElementById('pending-tbody');
     if(!tbody) return;
-    if(!token){ tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nhập Admin Token trước</td></tr>'; return; }
+    if(!token){ tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Bạn cần đăng nhập admin</td></tr>'; return; }
     try{
       const res = await fetch(`${API_BASE}/admin/pending/list`, { headers: { authorization: `Bearer ${token}` } });
       if(!res.ok){ tbody.innerHTML = `<tr><td colspan="3" class=\"empty-state\">Lỗi: ${res.status}</td></tr>`; return; }
@@ -99,33 +99,7 @@
   // Tự động nạp token đã lưu và tải danh sách khi vào trang
   document.addEventListener('DOMContentLoaded', function(){ adminLoadAll(); });
 
-  // Load danh sách IP đang chờ duyệt
-  async function adminLoadPending(){
-    const token = getAdminToken();
-    if(!token) return;
-    try{
-      const res = await fetch(`${API_BASE}/admin/pending/list`, { headers: {'x-admin-token': token} });
-      if(!res.ok) return;
-      const data = await res.json();
-      renderPendingTable(data.pending || []);
-    }catch(_){ }
-  }
-
-  // Auto save token and auto load on page ready
-  document.addEventListener('DOMContentLoaded', function(){
-    const inp = document.getElementById('adm-token');
-    const saved = localStorage.getItem('ymir_admin_token') || '';
-    if (inp) {
-      if (saved && !inp.value) inp.value = saved;
-      inp.addEventListener('input', function(){
-        localStorage.setItem('ymir_admin_token', (inp.value||'').trim());
-      });
-      inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ adminLoadTable(); }});
-    }
-    // Auto load once
-    adminLoadTable();
-    adminLoadPending();
-  });
+// (Removed legacy admin-token handlers)
   
   // Render bảng admin
   function renderAdminTable(users){
