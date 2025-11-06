@@ -277,6 +277,44 @@
   </style>
 </head>
 <body>
+  <div id="authOverlay" class="auth-overlay">Vui lòng đăng nhập để tiếp tục…</div>
+  <script>
+  async function sha256(t){const e=new TextEncoder().encode(t),n=await crypto.subtle.digest("SHA-256",e);return Array.from(new Uint8Array(n)).map(b=>b.toString(16).padStart(2,"0")).join("")}
+  async function getFingerprint(){
+    const d=[navigator.userAgent,navigator.language,Intl.DateTimeFormat().resolvedOptions().timeZone,
+      screen.width+'x'+screen.height,screen.colorDepth,navigator.platform].join('|');
+    return await sha256(d);
+  }
+  const AUTH_API='https://ymir-auth.tranlc-ymir.workers.dev';
+  async function requireAuth(){
+    try{
+      const fp=await getFingerprint();
+      const tok=localStorage.getItem('ymir_token');
+      if(tok){
+        const r=await fetch(`${AUTH_API}/verify?fp=${fp}`,{headers:{authorization:`Bearer ${tok}`}}).then(x=>x.json());
+        if(r&&r.ok){ setWatermark(r.user); hideOverlay(); return; }
+        localStorage.removeItem('ymir_token');
+      }
+      const u=prompt('Tài khoản:'); if(!u) return;
+      const p=prompt('Mật khẩu:'); if(!p) return;
+      const j=await fetch(`${AUTH_API}/login`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:u,password:p,fingerprint:fp})}).then(x=>x.json());
+      if(j&&j.token){ localStorage.setItem('ymir_token',j.token); setWatermark(u); hideOverlay(); }
+      else { alert('Login lỗi: '+(j&&j.error?j.error:'unknown')); location.reload(); }
+    }catch(err){ console.error(err); alert('Không thể xác thực. Kiểm tra kết nối.'); }
+  }
+  function setWatermark(text){
+    const wm=document.createElement('div'); wm.className='wm'; wm.textContent=(text||'')+' | '+new Date().toLocaleString();
+    document.body.appendChild(wm);
+  }
+  function hideOverlay(){ const ov=document.getElementById('authOverlay'); if(ov) ov.style.display='none'; }
+  requireAuth();
+  </script>
+  <style>
+    .auth-overlay{ position:fixed; inset:0; background:rgba(15,23,42,0.92); color:#e5e7eb; z-index:2000; display:flex; align-items:center; justify-content:center; font-size:18px; text-align:center; padding:24px }
+    .wm{position:fixed;inset:0;pointer-events:none;display:grid;place-items:center;
+      background-image:repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 2px, transparent 2px, transparent 80px);
+      color:rgba(255,255,255,0.08);font-size:28px;text-transform:uppercase}
+  </style>
   <div class="header">
     <h1>📖 Hướng dẫn sử dụng Tool ONE - YMIR</h1>
   </div>
