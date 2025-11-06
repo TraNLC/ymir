@@ -116,7 +116,6 @@
 
   function adminLoadAll(){
     adminLoadTable();
-    adminLoadPending();
   }
 
   // Tự động nạp token đã lưu và tải danh sách khi vào trang
@@ -129,18 +128,12 @@
     const tbody = document.getElementById('admin-ip-tbody');
     if(!tbody) return;
     if(users.length === 0){
-      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Chưa có user nào. Thêm user để bắt đầu quản lý IP.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Chưa có user nào.</td></tr>';
       return;
     }
     tbody.innerHTML = users.map(u => {
-      const ips = u.ips || [];
       const password = (u.password!==undefined && u.password!==null)? String(u.password) : '';
-      const ipList = ips.length > 0 ? ips.map(ip => `
-        <span class="ip-tag">
-          ${ip}
-          <button onclick="adminRemoveIpFromUser('${u.username}', '${ip}')">×</button>
-        </span>
-      `).join('') : '<span style="color: #94a3b8;">Chưa có IP</span>';
+      const status = u.deviceBound ? '<span style="color:#10b981">Đã login</span>' : '<span style="color:#94a3b8">Chưa login</span>';
       return `
         <tr>
           <td style="font-weight: 600;">
@@ -149,15 +142,12 @@
               <span>Pass:</span>
               <input type="text" id="pwd-${u.username}" value="${password.replace(/"/g,'&quot;')}" placeholder="(không có trong API)" style="width:180px;">
               <button onclick="adminUpdatePassword('${u.username}')">Lưu</button>
+              <button style="margin-left:6px;color:#f87171;border-color:#f87171" onclick="adminDeleteUser('${u.username}')">Xóa user</button>
             </div>
           </td>
-          <td>${ipList}</td>
+          <td>${status}</td>
           <td>
-            <div class="ip-input-group">
-              <input type="text" id="ip-input-${u.username}" placeholder="Nhập IP">
-              <button onclick="adminAddIpToUser('${u.username}')">+ Thêm IP</button>
-              <button onclick="adminGetMyIpForUser('${u.username}')" title="Lấy IP hiện tại">IP</button>
-            </div>
+            
           </td>
         </tr>
       `;
@@ -332,6 +322,33 @@
       addLog('ERROR adminUpdatePassword', e.message);
     }
   }
+  
+  // Xóa user
+  async function adminDeleteUser(username){
+    const token = getBearer();
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
+    if(!confirm(`Xóa user "${username}"?`)) return;
+    try{
+      addLog('REQUEST /admin/users/delete', {username});
+      const res = await fetch(`${API_BASE}/admin/users/delete`, {
+        method: 'POST',
+        headers: {'content-type':'application/json', authorization:`Bearer ${token}`},
+        body: JSON.stringify({ username })
+      });
+      const raw = await res.text();
+      addLog('RESPONSE /admin/users/delete', `status ${res.status}: ${raw}`);
+      if(res.ok){
+        setAdminMsg(`Đã xóa user "${username}"`, true);
+        adminLoadTable();
+        adminLoadPending();
+      } else {
+        setAdminMsg('Xóa thất bại: ' + (raw||res.status), false);
+      }
+    }catch(e){
+      setAdminMsg('Lỗi: ' + e.message, false);
+      addLog('ERROR adminDeleteUser', e.message);
+    }
+  }
   </script>
 
   <div class="admin-header">
@@ -350,25 +367,24 @@
           <input id="adm-new-username" placeholder="Username (ví dụ: demo)">
           <input id="adm-new-password" placeholder="Password (ví dụ: 123456)">
           <button class="btn-primary" onclick="adminAddUser()">Tạo user</button>
-          <button class="btn-primary" onclick="adminLoadAll()">Tải danh sách</button>
         </div>
       </div>
 
       
 
-      <!-- IP Management Table -->
+      <!-- Users Table -->
       <div class="table-wrapper">
         <table id="admin-ip-table">
           <thead>
             <tr>
               <th>Username</th>
-              <th>Danh sách IP</th>
+              <th>Trạng thái</th>
               <th>Thao tác</th>
             </tr>
           </thead>
           <tbody id="admin-ip-tbody">
             <tr>
-              <td colspan="3" class="empty-state">Nhấn "Tải danh sách" để xem users và IP</td>
+              <td colspan="3" class="empty-state">Nhấn "Tải danh sách" để xem users</td>
             </tr>
           </tbody>
         </table>
@@ -377,26 +393,7 @@
       <div id="adm-msg" class="admin-message"></div>
     </div>
 
-    <!-- Pending IPs -->
-    <div class="card" style="margin-top:16px;">
-      <h2>🕑 IP chờ duyệt</h2>
-      <div class="table-wrapper">
-        <table id="pending-table">
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>IP chờ duyệt</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="pending-tbody">
-            <tr>
-              <td colspan="3" class="empty-state">Chưa có yêu cầu duyệt IP</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    
 
     <!-- Debug log -->
     <div class="card" style="margin-top:16px;">
