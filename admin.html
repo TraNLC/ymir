@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — Quản lý IP truy cập</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <script>
+  async function sha256(t){const e=new TextEncoder().encode(t),n=await crypto.subtle.digest("SHA-256",e);return Array.from(new Uint8Array(n)).map(b=>b.toString(16).padStart(2,"0")).join("")}
+  async function getFingerprint(){
+    const d=[navigator.userAgent,navigator.language,Intl.DateTimeFormat().resolvedOptions().timeZone,
+      screen.width+'x'+screen.height,screen.colorDepth,navigator.platform].join('|');
+    return await sha256(d);
+  }
+  const AUTH_API='https://ymir-auth.tranlc-ymir.workers.dev';
+  // Check authentication and redirect if needed
+  async function requireAuth(){
+    try{
+      const fp=await getFingerprint();
+      const tok=localStorage.getItem('ymir_token');
+      if(!tok){
+        window.location.href='login.html';
+        return;
+      }
+      const r=await fetch(`${AUTH_API}/verify?fp=${fp}`,{headers:{authorization:`Bearer ${tok}`}}).then(x=>x.json());
+      if(r&&r.ok){
+        if(r.user!=='admin'){
+          window.location.href='user.html';
+          return;
+        }
+        return;
+      }else{
+        localStorage.removeItem('ymir_token');
+        window.location.href='login.html';
+      }
+    }catch{
+      window.location.href='login.html';
+    }
+  }
+  requireAuth();
+
+  // ---- Admin panel helpers ----
+  const API_BASE = AUTH_API;
+  function getAdminToken(){ return document.getElementById('adm-token').value.trim(); }
+  function setAdminMsg(msg, ok){ 
+    const el=document.getElementById('adm-msg'); 
+    if(el){ 
+      el.style.display = 'block';
+      el.style.color = ok? '#10b981' : '#f87171'; 
+      el.style.background = ok? 'rgba(16,185,129,0.1)' : 'rgba(248,113,113,0.1)';
+      el.style.border = `1px solid ${ok? '#10b981' : '#f87171'}`;
+      el.textContent = msg; 
+      if(ok) setTimeout(()=>{ el.style.display = 'none'; }, 3000);
+    } 
+  }
+  
+  // Load table với danh sách users và IPs
+  async function adminLoadTable(){
+    const token = getAdminToken();
+    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
+    try{
+      const res = await fetch(`${API_BASE}/admin/users/list`, { headers: {'x-admin-token': token} });
+      if(!res.ok) return setAdminMsg('Lỗi: ' + res.status, false);
+      const data = await res.json();
+      renderAdminTable(data.users || []);
+      setAdminMsg(`Đã tải ${data.users?.length || 0} user(s)`, true);
+    }catch(e){
+      setAdminMsg('Lỗi: ' + e.message, false);
+    }
+  }
+  
+  // Render bảng admin
+  function renderAdminTable(users){
+    const tbody = document.getElementById('admin-ip-tbody');
+    if(!tbody) return;
+    if(users.length === 0){
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Chưa có user nào. Thêm user để bắt đầu quản lý IP.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(u => {
+      const ips = u.ips || [];
+      const ipList = ips.length > 0 ? ips.map(ip => `
+        <span class="ip-tag">
+          ${ip}
+          <button onclick="adminRemoveIpFromUser('${u.username}', '${ip}')">×</button>
+        </span>
+      `).join('') : '<span style="color: #94a3b8;">Chưa có IP</span>';
+      return `
+        <tr>
+          <td style="font-weight: 600;">${u.username}</td>
+          <td>${ipList}</td>
+          <td>
+            <div class="ip-input-group">
+              <input type="text" id="ip-input-${u.username}" placeholder="Nhập IP">
+              <button onclick="adminAddIpToUser('${u.username}')">+ Thêm IP</button>
+              <button onclick="adminGetMyIpForUser('${u.username}')" title="Lấy IP hiện tại">IP</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+  
+  // Thêm user vào danh sách quản lý
+  async function adminAddUser(){
+    const token = getAdminToken();
+    const username = document.getElementById('adm-new-username').value.trim();
+    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
+    if(!username) return setAdminMsg('Nhập username', false);
+    try{
+      const res = await fetch(`${API_BASE}/admin/users/add`, { 
+        method: 'POST', 
+        headers: {'content-type': 'application/json', 'x-admin-token': token}, 
+        body: JSON.stringify({ username }) 
+      });
+      const j = await res.json().catch(()=>({}));
+      if(res.ok){
+        setAdminMsg(`Đã thêm user "${username}"`, true);
+        document.getElementById('adm-new-username').value = '';
+        adminLoadTable();
+      }else{
+        setAdminMsg('Lỗi: ' + (j.error || res.status), false);
+      }
+    }catch(e){
+      setAdminMsg('Lỗi: ' + e.message, false);
+    }
+  }
+  
+  // Thêm IP cho user
+  async function adminAddIpToUser(username){
+    const token = getAdminToken();
+    const ipInput = document.getElementById(`ip-input-${username}`);
+    const ip = ipInput?.value.trim();
+    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
+    if(!ip) return setAdminMsg('Nhập IP', false);
+    try{
+      const res = await fetch(`${API_BASE}/admin/allowip/add`, { 
+        method: 'POST', 
+        headers: {'content-type': 'application/json', 'x-admin-token': token}, 
+        body: JSON.stringify({ username, ip }) 
+      });
+      const j = await res.json().catch(()=>({}));
+      if(res.ok){
+        setAdminMsg(`Đã thêm IP ${ip} cho ${username}`, true);
+        ipInput.value = '';
+        adminLoadTable();
+      }else{
+        setAdminMsg('Lỗi: ' + (j.error || res.status), false);
+      }
+    }catch(e){
+      setAdminMsg('Lỗi: ' + e.message, false);
+    }
+  }
+  
+  // Xóa IP của user
+  async function adminRemoveIpFromUser(username, ip){
+    const token = getAdminToken();
+    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
+    if(!confirm(`Xóa IP ${ip} của user ${username}?`)) return;
+    try{
+      const res = await fetch(`${API_BASE}/admin/allowip/remove`, { 
+        method: 'POST', 
+        headers: {'content-type': 'application/json', 'x-admin-token': token}, 
+        body: JSON.stringify({ username, ip }) 
+      });
+      const j = await res.json().catch(()=>({}));
+      if(res.ok){
+        setAdminMsg(`Đã xóa IP ${ip}`, true);
+        adminLoadTable();
+      }else{
+        setAdminMsg('Lỗi: ' + (j.error || res.status), false);
+      }
+    }catch(e){
+      setAdminMsg('Lỗi: ' + e.message, false);
+    }
+  }
+  
+  // Lấy IP hiện tại và điền vào input
+  async function adminGetMyIpForUser(username){
+    try{
+      const ip = await fetch('https://api.ipify.org').then(r=>r.text());
+      const ipInput = document.getElementById(`ip-input-${username}`);
+      if(ipInput) ipInput.value = ip;
+      setAdminMsg(`Đã lấy IP: ${ip}`, true);
+    }catch{
+      setAdminMsg('Không lấy được IP', false);
+    }
+  }
+  </script>
+
+  <div class="admin-header">
+    <h1>🔐 Admin — Quản lý IP truy cập</h1>
+  </div>
+
+  <div class="container">
+    <div id="admin-panel" class="card">
+      <h2>Quản lý Users & IPs</h2>
+      <p style="margin-bottom: 20px;">Quản lý IP được phép theo từng tài khoản. API: <code>ymir-auth.tranlc-ymir.workers.dev</code></p>
+      
+      <!-- Admin Token Input -->
+      <div class="admin-section">
+        <label>Admin Token</label>
+        <div class="input-group">
+          <input id="adm-token" type="password" placeholder="Nhập ADMIN_TOKEN">
+          <button class="btn-primary" onclick="adminLoadTable()">Tải danh sách</button>
+        </div>
+      </div>
+
+      <!-- Add User Form -->
+      <div class="admin-section">
+        <h3>➕ Thêm user vào danh sách quản lý</h3>
+        <div class="input-group">
+          <input id="adm-new-username" placeholder="Username (ví dụ: demo)">
+          <button class="btn-primary" onclick="adminAddUser()">Thêm user</button>
+        </div>
+      </div>
+
+      <!-- IP Management Table -->
+      <div class="table-wrapper">
+        <table id="admin-ip-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Danh sách IP</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="admin-ip-tbody">
+            <tr>
+              <td colspan="3" class="empty-state">Nhấn "Tải danh sách" để xem users và IP</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="adm-msg" class="admin-message"></div>
+    </div>
+  </div>
+</body>
+</html>
+

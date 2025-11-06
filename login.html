@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng nhập - YMIR Guide</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <!-- Animated background particles -->
+  <div class="bg-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+  
+  <!-- Login Card -->
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <h2 class="login-title">Đăng nhập</h2>
+        <p class="login-subtitle">Nhập thông tin để truy cập hướng dẫn</p>
+      </div>
+      
+      <form class="login-form" onsubmit="event.preventDefault(); submitLogin();">
+        <div class="input-group">
+          <div class="input-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <input 
+            id="login-username" 
+            type="text" 
+            placeholder="Tài khoản" 
+            autocomplete="username"
+            required
+            autofocus
+          >
+        </div>
+        
+        <div class="input-group">
+          <div class="input-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <input 
+            id="login-password" 
+            type="password" 
+            placeholder="Mật khẩu" 
+            autocomplete="current-password"
+            required
+          >
+        </div>
+        
+        <button type="submit" class="login-btn" id="login-submit-btn">
+          <span class="btn-text">Đăng nhập</span>
+          <span class="btn-loader" style="display:none;">
+            <svg class="spinner" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="32" stroke-dashoffset="32">
+                <animate attributeName="stroke-dasharray" dur="2s" values="0 32;16 16;0 32;0 32" repeatCount="indefinite"/>
+                <animate attributeName="stroke-dashoffset" dur="2s" values="0;-16;-32;-32" repeatCount="indefinite"/>
+              </circle>
+            </svg>
+          </span>
+        </button>
+        
+        <div id="login-msg" class="login-message"></div>
+      </form>
+      
+      <div class="login-footer">
+        <div class="security-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Bảo mật PC-bound</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const AUTH_API = 'https://ymir-auth.tranlc-ymir.workers.dev';
+  
+  async function sha256(t) {
+    const e = new TextEncoder().encode(t);
+    const n = await crypto.subtle.digest("SHA-256", e);
+    return Array.from(new Uint8Array(n)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  
+  async function getFingerprint() {
+    const d = [
+      navigator.userAgent,
+      navigator.language,
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+      screen.width + 'x' + screen.height,
+      screen.colorDepth,
+      navigator.platform
+    ].join('|');
+    return await sha256(d);
+  }
+  
+  // Check if already logged in
+  async function checkAuth() {
+    try {
+      const fp = await getFingerprint();
+      const tok = localStorage.getItem('ymir_token');
+      if (tok) {
+        const r = await fetch(`${AUTH_API}/verify?fp=${fp}`, {
+          headers: { authorization: `Bearer ${tok}` }
+        }).then(x => x.json());
+        if (r && r.ok) {
+          redirectAfterLogin(r.user);
+          return;
+        }
+        localStorage.removeItem('ymir_token');
+        localStorage.removeItem('ymir_user');
+      }
+    } catch (err) {
+      console.error('Auth check error:', err);
+    }
+  }
+  
+  async function submitLogin() {
+    const u = (document.getElementById('login-username').value || '').trim();
+    const p = (document.getElementById('login-password').value || '').trim();
+    const msgEl = document.getElementById('login-msg');
+    const btnEl = document.getElementById('login-submit-btn');
+    
+    // Clear previous messages
+    msgEl.textContent = '';
+    msgEl.className = 'login-message';
+    
+    // Validation
+    if (!u || !p) {
+      msgEl.textContent = 'Vui lòng nhập đủ tài khoản và mật khẩu';
+      msgEl.className = 'login-message error';
+      return;
+    }
+    
+    // Show loading state
+    btnEl.disabled = true;
+    btnEl.classList.add('loading');
+    msgEl.textContent = 'Đang xử lý...';
+    msgEl.className = 'login-message';
+    
+    try {
+      const fp = await getFingerprint();
+      const res = await fetch(`${AUTH_API}/login`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p, fingerprint: fp })
+      });
+      const j = await res.json();
+      
+      if (j && j.token) {
+        localStorage.setItem('ymir_token', j.token);
+        localStorage.setItem('ymir_user', u);
+        msgEl.textContent = 'Đăng nhập thành công!';
+        msgEl.className = 'login-message success';
+        setTimeout(() => {
+          redirectAfterLogin(u);
+        }, 500);
+      } else {
+        const errorMsg = j?.error === 'invalid' ? 'Sai tài khoản hoặc mật khẩu' :
+                        j?.error === 'ip_not_allowed' ? 'IP không được phép truy cập' :
+                        j?.error === 'locked_to_other_device' ? 'Tài khoản đã được đăng nhập trên thiết bị khác' :
+                        'Đăng nhập thất bại. Vui lòng thử lại.';
+        msgEl.textContent = errorMsg;
+        msgEl.className = 'login-message error';
+        btnEl.disabled = false;
+        btnEl.classList.remove('loading');
+      }
+    } catch (err) {
+      msgEl.textContent = 'Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.';
+      msgEl.className = 'login-message error';
+      btnEl.disabled = false;
+      btnEl.classList.remove('loading');
+    }
+  }
+  
+  function redirectAfterLogin(user) {
+    // Admin user -> redirect to admin.html
+    if (user === 'admin') {
+      window.location.href = 'admin.html';
+    } else {
+      // Normal user -> redirect to user.html
+      window.location.href = 'user.html';
+    }
+  }
+  
+  // Check auth on load
+  checkAuth();
+  </script>
+</body>
+</html>
+
