@@ -277,7 +277,17 @@
   </style>
 </head>
 <body>
-  <div id="authOverlay" class="auth-overlay">Vui lòng đăng nhập để tiếp tục…</div>
+  <div id="authOverlay" class="auth-overlay">
+    <div class="login-card">
+      <h3 style="margin-top:0">Đăng nhập</h3>
+      <div class="login-row"><label>Tài khoản</label><input id="login-username" placeholder="vd: admin"></div>
+      <div class="login-row"><label>Mật khẩu</label><input id="login-password" type="password" placeholder="••••••"></div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button class="nav-tab" onclick="submitLogin()">Đăng nhập</button>
+        <span id="login-msg" style="align-self:center"></span>
+      </div>
+    </div>
+  </div>
   <script>
   async function sha256(t){const e=new TextEncoder().encode(t),n=await crypto.subtle.digest("SHA-256",e);return Array.from(new Uint8Array(n)).map(b=>b.toString(16).padStart(2,"0")).join("")}
   async function getFingerprint(){
@@ -292,16 +302,25 @@
       const tok=localStorage.getItem('ymir_token');
       if(tok){
         const r=await fetch(`${AUTH_API}/verify?fp=${fp}`,{headers:{authorization:`Bearer ${tok}`}}).then(x=>x.json());
-        if(r&&r.ok){ setWatermark(r.user); hideOverlay(); return; }
+        if(r&&r.ok){ afterLogin(r.user); hideOverlay(); return; }
         localStorage.removeItem('ymir_token');
       }
-      const u=prompt('Tài khoản:'); if(!u) return;
-      const p=prompt('Mật khẩu:'); if(!p) return;
-      const j=await fetch(`${AUTH_API}/login`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:u,password:p,fingerprint:fp})}).then(x=>x.json());
-      if(j&&j.token){ localStorage.setItem('ymir_token',j.token); setWatermark(u); hideOverlay(); }
-      else { alert('Login lỗi: '+(j&&j.error?j.error:'unknown')); location.reload(); }
+      // chờ người dùng nhập form
+      document.getElementById('authOverlay').style.display='flex';
     }catch(err){ console.error(err); alert('Không thể xác thực. Kiểm tra kết nối.'); }
   }
+  async function submitLogin(){
+    const u=(document.getElementById('login-username').value||'').trim();
+    const p=(document.getElementById('login-password').value||'').trim();
+    const msgEl=document.getElementById('login-msg');
+    msgEl.textContent='';
+    if(!u||!p){ msgEl.textContent='Nhập đủ tài khoản/mật khẩu'; msgEl.style.color='#f87171'; return; }
+    const fp=await getFingerprint();
+    const j=await fetch(`${AUTH_API}/login`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:u,password:p,fingerprint:fp})}).then(x=>x.json());
+    if(j&&j.token){ localStorage.setItem('ymir_token',j.token); localStorage.setItem('ymir_user',u); afterLogin(u); hideOverlay(); }
+    else { msgEl.textContent='Login lỗi: '+(j&&j.error?j.error:'unknown'); msgEl.style.color='#f87171'; }
+  }
+  function afterLogin(user){ setWatermark(user); if(user==='admin'){ const panel=document.getElementById('admin-panel'); if(panel) panel.style.display='block'; if(location.search.indexOf('admin=1')===-1){ history.replaceState({},'',location.pathname+'?admin=1'); } } }
   function setWatermark(text){
     const wm=document.createElement('div'); wm.className='wm'; wm.textContent=(text||'')+' | '+new Date().toLocaleString();
     document.body.appendChild(wm);
@@ -347,7 +366,10 @@
   showAdminIfRequested();
   </script>
   <style>
-    .auth-overlay{ position:fixed; inset:0; background:rgba(15,23,42,0.92); color:#e5e7eb; z-index:2000; display:flex; align-items:center; justify-content:center; font-size:18px; text-align:center; padding:24px }
+    .auth-overlay{ position:fixed; inset:0; background:rgba(15,23,42,0.92); color:#e5e7eb; z-index:2000; display:flex; align-items:center; justify-content:center; font-size:16px; text-align:left; padding:24px }
+    .login-card{ background:#0b1220; border:1px solid var(--border); border-radius:10px; padding:16px; width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.4) }
+    .login-row{ display:flex; flex-direction:column; gap:6px; margin:8px 0 }
+    .login-row input{ padding:10px 12px; border:1px solid var(--border); border-radius:6px; background:#0b1220; color:#e5e7eb }
     .wm{position:fixed;inset:0;pointer-events:none;display:grid;place-items:center;
       background-image:repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 2px, transparent 2px, transparent 80px);
       color:rgba(255,255,255,0.08);font-size:28px;text-transform:uppercase}
