@@ -27,12 +27,7 @@
       }
       const r=await fetch(`${AUTH_API}/verify?fp=${fp}`,{headers:{authorization:`Bearer ${tok}`}}).then(x=>x.json());
       if(r&&r.ok){
-        // Check if admin user - redirect to admin page
-        if(r.user==='admin'){
-          window.location.href='admin.html';
-          return;
-        }
-        // Normal user - allow access
+        // Cho phép admin xem trang user; không auto-redirect
         return;
       }
       // Invalid token, redirect to login
@@ -50,6 +45,10 @@
   </script>
   <div class="header">
     <h1>📖 Hướng dẫn sử dụng Tool ONE - YMIR</h1>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <button onclick="gotoAdmin()" title="Vào trang quản trị">Quản trị</button>
+      <button onclick="doLogout()" title="Đăng xuất">Đăng xuất</button>
+    </div>
   </div>
   <button class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()" title="Lên đầu trang">↑</button>
 
@@ -1890,6 +1889,34 @@
     window.addEventListener('beforeprint', function() { document.body.style.display = 'none'; });
     window.addEventListener('afterprint', function() { document.body.style.display = ''; });
 
+  </script>
+  <script>
+  async function gotoAdmin(){
+    try{
+      const fp = await getFingerprint();
+      const tok = localStorage.getItem('ymir_token')||'';
+      // nếu đã là admin rồi thì vào thẳng
+      const r = tok ? await fetch(`${AUTH_API}/verify?fp=${fp}`,{headers:{authorization:`Bearer ${tok}`}}).then(x=>x.json()).catch(()=>null) : null;
+      if(r && r.ok && r.user==='admin'){ window.location.href='admin.html'; return; }
+      // yêu cầu nhập tài khoản admin
+      const u = prompt('Nhập ID admin:','admin');
+      if(!u) return;
+      const p = prompt('Nhập mật khẩu admin:','');
+      if(!p) return;
+      const res = await fetch(`${AUTH_API}/login`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:u,password:p,fingerprint:fp})});
+      const data = await res.json();
+      if(res.ok && data.token){ localStorage.setItem('ymir_token', data.token); window.location.href='admin.html'; }
+      else alert('Đăng nhập admin thất bại');
+    }catch{ alert('Không thể vào trang quản trị'); }
+  }
+  async function doLogout(){
+    try{
+      const token = localStorage.getItem('ymir_token');
+      if(token) await fetch(`${AUTH_API}/logout`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({token})});
+    }catch{}
+    localStorage.removeItem('ymir_token');
+    window.location.href='login.html';
+  }
   </script>
 </body>
 </html>

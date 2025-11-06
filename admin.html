@@ -434,6 +434,10 @@
 
   <div class="admin-header">
     <h1>🔐 Admin — Quản lý IP truy cập</h1>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <button onclick="window.location.href='user.html'">Xem nội dung</button>
+      <button onclick="(function(){localStorage.removeItem('ymir_token');window.location.href='login.html';})()">Đăng xuất</button>
+    </div>
   </div>
 
   <div class="container">
