@@ -308,6 +308,43 @@
   }
   function hideOverlay(){ const ov=document.getElementById('authOverlay'); if(ov) ov.style.display='none'; }
   requireAuth();
+
+  // ---- Admin panel helpers ----
+  const API_BASE = AUTH_API; // dùng cùng backend
+  function showAdminIfRequested(){
+    const params = new URLSearchParams(location.search);
+    if(params.get('admin') === '1'){
+      const panel = document.getElementById('admin-panel');
+      if(panel) panel.style.display = 'block';
+    }
+  }
+  async function adminGetMyIp(){
+    try{
+      const ip = await fetch('https://api.ipify.org').then(r=>r.text());
+      document.getElementById('adm-ip').value = ip;
+      setAdminMsg('IP hiện tại: '+ip, true);
+    }catch{ setAdminMsg('Không lấy được IP', false); }
+  }
+  async function adminAllowIp(){
+    const t = document.getElementById('adm-token').value.trim();
+    const u = document.getElementById('adm-username').value.trim();
+    const ip = document.getElementById('adm-ip').value.trim();
+    if(!t||!u||!ip) return setAdminMsg('Nhập đủ Token/Username/IP', false);
+    const res = await fetch(`${API_BASE}/admin/allowip/add`, { method:'POST', headers:{'content-type':'application/json','x-admin-token':t}, body: JSON.stringify({ username:u, ip })});
+    const j = await res.json().catch(()=>({}));
+    setAdminMsg(res.ok? 'Đã thêm IP.' : ('Lỗi: '+(j.error||res.status)), res.ok);
+  }
+  async function adminRemoveIp(){
+    const t = document.getElementById('adm-token').value.trim();
+    const u = document.getElementById('adm-username').value.trim();
+    const ip = document.getElementById('adm-ip').value.trim();
+    if(!t||!u||!ip) return setAdminMsg('Nhập đủ Token/Username/IP', false);
+    const res = await fetch(`${API_BASE}/admin/allowip/remove`, { method:'POST', headers:{'content-type':'application/json','x-admin-token':t}, body: JSON.stringify({ username:u, ip })});
+    const j = await res.json().catch(()=>({}));
+    setAdminMsg(res.ok? 'Đã gỡ IP.' : ('Lỗi: '+(j.error||res.status)), res.ok);
+  }
+  function setAdminMsg(msg, ok){ const el=document.getElementById('adm-msg'); if(el){ el.style.color = ok? '#10b981' : '#f87171'; el.textContent = msg; } }
+  showAdminIfRequested();
   </script>
   <style>
     .auth-overlay{ position:fixed; inset:0; background:rgba(15,23,42,0.92); color:#e5e7eb; z-index:2000; display:flex; align-items:center; justify-content:center; font-size:18px; text-align:center; padding:24px }
@@ -321,7 +358,32 @@
   <button class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()" title="Lên đầu trang">↑</button>
 
   <div class="container">
-   
+  
+    <!-- ADMIN PANEL (ẩn mặc định, mở bằng ?admin=1) -->
+    <div id="admin-panel" class="card" style="display:none;">
+      <h2>🔐 Admin — Quản lý truy cập</h2>
+      <p>Quản lý IP được phép theo từng tài khoản. API: <code>ymir-auth.tranlc-ymir.workers.dev</code></p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin:12px 0;">
+        <label style="flex:1 1 260px;">
+          <div>Admin Token</div>
+          <input id="adm-token" type="password" placeholder="Nhập ADMIN_TOKEN" style="width:100%; padding:8px; background:#0b1220; color:#e5e7eb; border:1px solid var(--border); border-radius:6px;">
+        </label>
+        <label style="flex:1 1 220px;">
+          <div>Username</div>
+          <input id="adm-username" placeholder="ví dụ: demo" style="width:100%; padding:8px; background:#0b1220; color:#e5e7eb; border:1px solid var(--border); border-radius:6px;">
+        </label>
+        <label style="flex:1 1 220px;">
+          <div>IP</div>
+          <input id="adm-ip" placeholder="1.2.3.4" style="width:100%; padding:8px; background:#0b1220; color:#e5e7eb; border:1px solid var(--border); border-radius:6px;">
+        </label>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="nav-tab" onclick="adminGetMyIp()">Lấy IP hiện tại</button>
+        <button class="nav-tab" onclick="adminAllowIp()">Thêm IP cho user</button>
+        <button class="nav-tab" onclick="adminRemoveIp()">Gỡ IP của user</button>
+        <span id="adm-msg" style="margin-left:8px; color:#a7f3d0"></span>
+      </div>
+    </div>
 
     <div class="nav-tabs">
       <button class="nav-tab active" onclick="showMainTab('preview')">📸 Preview - Giao Diện</button>
