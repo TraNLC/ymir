@@ -46,11 +46,7 @@
 
   // ---- Admin panel helpers ----
   const API_BASE = AUTH_API;
-  function getAdminToken(){
-    const inp = document.getElementById('adm-token');
-    const v = (inp && inp.value ? inp.value.trim() : '');
-    return v || (localStorage.getItem('ymir_admin_token')||'').trim();
-  }
+  function getBearer(){ return localStorage.getItem('ymir_token') || ''; }
   function setAdminMsg(msg, ok){ 
     const el=document.getElementById('adm-msg'); 
     if(el){ 
@@ -65,10 +61,10 @@
   
   // Load table với danh sách users và IPs
   async function adminLoadTable(){
-    const token = getAdminToken();
-    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
+    const token = getBearer();
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
     try{
-      const res = await fetch(`${API_BASE}/admin/users/list`, { headers: {'x-admin-token': token} });
+      const res = await fetch(`${API_BASE}/admin/users/list`, { headers: { authorization: `Bearer ${token}` } });
       if(!res.ok) return setAdminMsg('Lỗi: ' + res.status, false);
       const data = await res.json();
       renderAdminTable(data.users || []);
@@ -80,12 +76,12 @@
 
   // Load danh sách IP chờ duyệt
   async function adminLoadPending(){
-    const token = getAdminToken();
+    const token = getBearer();
     const tbody = document.getElementById('pending-tbody');
     if(!tbody) return;
     if(!token){ tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nhập Admin Token trước</td></tr>'; return; }
     try{
-      const res = await fetch(`${API_BASE}/admin/pending/list`, { headers: {'x-admin-token': token} });
+      const res = await fetch(`${API_BASE}/admin/pending/list`, { headers: { authorization: `Bearer ${token}` } });
       if(!res.ok){ tbody.innerHTML = `<tr><td colspan="3" class=\"empty-state\">Lỗi: ${res.status}</td></tr>`; return; }
       const data = await res.json();
       renderPendingTable(data.pending || []);
@@ -96,19 +92,12 @@
   }
 
   function adminLoadAll(){
-    const inp = document.getElementById('adm-token');
-    if (inp) localStorage.setItem('ymir_admin_token', (inp.value||'').trim());
     adminLoadTable();
     adminLoadPending();
   }
 
   // Tự động nạp token đã lưu và tải danh sách khi vào trang
-  document.addEventListener('DOMContentLoaded', function(){
-    const inp = document.getElementById('adm-token');
-    const saved = localStorage.getItem('ymir_admin_token') || '';
-    if (inp && saved && !inp.value) inp.value = saved;
-    if (saved) { adminLoadAll(); }
-  });
+  document.addEventListener('DOMContentLoaded', function(){ adminLoadAll(); });
 
   // Load danh sách IP đang chờ duyệt
   async function adminLoadPending(){
@@ -191,12 +180,12 @@
   }
 
   async function adminApprovePending(username, ip){
-    const token = getAdminToken();
-    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
+    const token = getBearer();
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
     try{
       const res = await fetch(`${API_BASE}/admin/pending/approve`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-admin-token': token },
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
         body: JSON.stringify({ username, ip })
       });
       if(res.ok){
@@ -213,20 +202,22 @@
   
   // Thêm user vào danh sách quản lý
   async function adminAddUser(){
-    const token = getAdminToken();
-    const username = document.getElementById('adm-new-username').value.trim();
-    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
-    if(!username) return setAdminMsg('Nhập username', false);
+    const token = getBearer();
+    const username = (document.getElementById('adm-new-username').value||'').trim();
+    const password = (document.getElementById('adm-new-password')?.value||'').trim();
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
+    if(!username || !password) return setAdminMsg('Nhập username và password', false);
     try{
-      const res = await fetch(`${API_BASE}/admin/users/add`, { 
+      const res = await fetch(`${API_BASE}/admin/users/create`, { 
         method: 'POST', 
-        headers: {'content-type': 'application/json', 'x-admin-token': token}, 
-        body: JSON.stringify({ username }) 
+        headers: {'content-type': 'application/json', authorization: `Bearer ${token}`}, 
+        body: JSON.stringify({ username, password }) 
       });
       const j = await res.json().catch(()=>({}));
       if(res.ok){
-        setAdminMsg(`Đã thêm user "${username}"`, true);
+        setAdminMsg(`Đã tạo user "${username}"`, true);
         document.getElementById('adm-new-username').value = '';
+        if(document.getElementById('adm-new-password')) document.getElementById('adm-new-password').value = '';
         adminLoadTable();
       }else{
         setAdminMsg('Lỗi: ' + (j.error || res.status), false);
@@ -238,15 +229,15 @@
   
   // Thêm IP cho user
   async function adminAddIpToUser(username){
-    const token = getAdminToken();
+    const token = getBearer();
     const ipInput = document.getElementById(`ip-input-${username}`);
     const ip = ipInput?.value.trim();
-    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
     if(!ip) return setAdminMsg('Nhập IP', false);
     try{
       const res = await fetch(`${API_BASE}/admin/allowip/add`, { 
         method: 'POST', 
-        headers: {'content-type': 'application/json', 'x-admin-token': token}, 
+        headers: {'content-type': 'application/json', authorization: `Bearer ${token}`}, 
         body: JSON.stringify({ username, ip }) 
       });
       const j = await res.json().catch(()=>({}));
@@ -264,13 +255,13 @@
   
   // Xóa IP của user
   async function adminRemoveIpFromUser(username, ip){
-    const token = getAdminToken();
-    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
+    const token = getBearer();
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
     if(!confirm(`Xóa IP ${ip} của user ${username}?`)) return;
     try{
       const res = await fetch(`${API_BASE}/admin/allowip/remove`, { 
         method: 'POST', 
-        headers: {'content-type': 'application/json', 'x-admin-token': token}, 
+        headers: {'content-type': 'application/json', authorization: `Bearer ${token}`}, 
         body: JSON.stringify({ username, ip }) 
       });
       const j = await res.json().catch(()=>({}));
@@ -307,23 +298,18 @@
       <h2>Quản lý Users & IPs</h2>
       <p style="margin-bottom: 20px;">Quản lý IP được phép theo từng tài khoản. API: <code>ymir-auth.tranlc-ymir.workers.dev</code></p>
       
-      <!-- Admin Token Input -->
+      <!-- Admin controls (no token needed, uses admin session) -->
       <div class="admin-section">
-        <label>Admin Token</label>
+        <h3 style="margin:0 0 12px 0;">Tạo nhanh user</h3>
         <div class="input-group">
-          <input id="adm-token" type="password" placeholder="Nhập ADMIN_TOKEN">
+          <input id="adm-new-username" placeholder="Username (ví dụ: demo)">
+          <input id="adm-new-password" placeholder="Password (ví dụ: 123456)">
+          <button class="btn-primary" onclick="adminAddUser()">Tạo user</button>
           <button class="btn-primary" onclick="adminLoadAll()">Tải danh sách</button>
         </div>
       </div>
 
-      <!-- Add User Form -->
-      <div class="admin-section">
-        <h3>➕ Thêm user vào danh sách quản lý</h3>
-        <div class="input-group">
-          <input id="adm-new-username" placeholder="Username (ví dụ: demo)">
-          <button class="btn-primary" onclick="adminAddUser()">Thêm user</button>
-        </div>
-      </div>
+      
 
       <!-- IP Management Table -->
       <div class="table-wrapper">
