@@ -47,6 +47,17 @@
   // ---- Admin panel helpers ----
   const API_BASE = AUTH_API;
   function getBearer(){ return localStorage.getItem('ymir_token') || ''; }
+  // lightweight debug logger rendered on the page
+  const __logs = [];
+  function addLog(label, payload){
+    try{
+      const ts = new Date().toISOString();
+      const entry = `[${ts}] ${label} ` + (payload!==undefined? (typeof payload==='string'? payload : JSON.stringify(payload)) : '');
+      __logs.unshift(entry);
+      const pre = document.getElementById('debug-pre');
+      if(pre){ pre.textContent = __logs.slice(0,200).join("\n\n"); }
+    }catch(_){ /* ignore */ }
+  }
   function setAdminMsg(msg, ok){ 
     const el=document.getElementById('adm-msg'); 
     if(el){ 
@@ -59,18 +70,30 @@
     } 
   }
   
-  // Load table với danh sách users và IPs
+// Load table với danh sách users và IPs (ưu tiên /admin/users/all để lấy cả password)
   async function adminLoadTable(){
     const token = getBearer();
     if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
     try{
-      const res = await fetch(`${API_BASE}/admin/users/list`, { headers: { authorization: `Bearer ${token}` } });
-      if(!res.ok) return setAdminMsg('Lỗi: ' + res.status, false);
-      const data = await res.json();
+      addLog('REQUEST /admin/users/all');
+      let res = await fetch(`${API_BASE}/admin/users/all`, { headers: { authorization: `Bearer ${token}` } });
+      let text = await res.text();
+      addLog('RESPONSE /admin/users/all', `status ${res.status}: ${text}`);
+      let data = {};
+      try{ data = JSON.parse(text); }catch(_){ data = {}; }
+      if(!res.ok || !data.users){
+        // fallback to older endpoint
+        addLog('FALLBACK /admin/users/list');
+        res = await fetch(`${API_BASE}/admin/users/list`, { headers: { authorization: `Bearer ${token}` } });
+        text = await res.text();
+        addLog('RESPONSE /admin/users/list', `status ${res.status}: ${text}`);
+        try{ data = JSON.parse(text); }catch(_){ data = {}; }
+      }
       renderAdminTable(data.users || []);
       setAdminMsg(`Đã tải ${data.users?.length || 0} user(s)`, true);
     }catch(e){
       setAdminMsg('Lỗi: ' + e.message, false);
+      addLog('ERROR adminLoadTable', e.message);
     }
   }
 
@@ -111,6 +134,7 @@
     }
     tbody.innerHTML = users.map(u => {
       const ips = u.ips || [];
+      const password = (u.password!==undefined && u.password!==null)? String(u.password) : '';
       const ipList = ips.length > 0 ? ips.map(ip => `
         <span class="ip-tag">
           ${ip}
@@ -119,7 +143,14 @@
       `).join('') : '<span style="color: #94a3b8;">Chưa có IP</span>';
       return `
         <tr>
-          <td style="font-weight: 600;">${u.username}</td>
+          <td style="font-weight: 600;">
+            <div>${u.username}</div>
+            <div style="margin-top:6px;color:#94a3b8;">
+              <span>Pass:</span>
+              <input type="text" id="pwd-${u.username}" value="${password.replace(/"/g,'&quot;')}" placeholder="(không có trong API)" style="width:180px;">
+              <button onclick="adminUpdatePassword('${u.username}')">Lưu</button>
+            </div>
+          </td>
           <td>${ipList}</td>
           <td>
             <div class="ip-input-group">
@@ -167,10 +198,13 @@
         adminLoadTable();
         adminLoadPending();
       } else {
-        setAdminMsg('Duyệt thất bại', false);
+        const t = await res.text();
+        setAdminMsg('Duyệt thất bại: ' + (t||res.status), false);
+        addLog('pending/approve failed', t||res.status);
       }
     }catch(e){
       setAdminMsg('Lỗi: ' + e.message, false);
+      addLog('ERROR adminApprovePending', e.message);
     }
   }
   
@@ -182,22 +216,26 @@
     if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
     if(!username || !password) return setAdminMsg('Nhập username và password', false);
     try{
+      addLog('REQUEST /admin/users/create', {username});
       const res = await fetch(`${API_BASE}/admin/users/create`, { 
         method: 'POST', 
         headers: {'content-type': 'application/json', authorization: `Bearer ${token}`}, 
         body: JSON.stringify({ username, password }) 
       });
-      const j = await res.json().catch(()=>({}));
+      const raw = await res.text();
+      addLog('RESPONSE /admin/users/create', `status ${res.status}: ${raw}`);
+      const j = (()=>{ try{return JSON.parse(raw);}catch(_){return {};}})();
       if(res.ok){
         setAdminMsg(`Đã tạo user "${username}"`, true);
         document.getElementById('adm-new-username').value = '';
         if(document.getElementById('adm-new-password')) document.getElementById('adm-new-password').value = '';
         adminLoadTable();
       }else{
-        setAdminMsg('Lỗi: ' + (j.error || res.status), false);
+        setAdminMsg('Lỗi: ' + (j.error || raw || res.status), false);
       }
     }catch(e){
       setAdminMsg('Lỗi: ' + e.message, false);
+      addLog('ERROR adminAddUser', e.message);
     }
   }
   
@@ -209,21 +247,25 @@
     if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
     if(!ip) return setAdminMsg('Nhập IP', false);
     try{
+      addLog('REQUEST /admin/allowip/add', {username, ip});
       const res = await fetch(`${API_BASE}/admin/allowip/add`, { 
         method: 'POST', 
         headers: {'content-type': 'application/json', authorization: `Bearer ${token}`}, 
         body: JSON.stringify({ username, ip }) 
       });
-      const j = await res.json().catch(()=>({}));
+      const raw = await res.text();
+      addLog('RESPONSE /admin/allowip/add', `status ${res.status}: ${raw}`);
+      const j = (()=>{ try{return JSON.parse(raw);}catch(_){return {};}})();
       if(res.ok){
         setAdminMsg(`Đã thêm IP ${ip} cho ${username}`, true);
         ipInput.value = '';
         adminLoadTable();
       }else{
-        setAdminMsg('Lỗi: ' + (j.error || res.status), false);
+        setAdminMsg('Lỗi: ' + (j.error || raw || res.status), false);
       }
     }catch(e){
       setAdminMsg('Lỗi: ' + e.message, false);
+      addLog('ERROR adminAddIpToUser', e.message);
     }
   }
   
@@ -233,20 +275,24 @@
     if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
     if(!confirm(`Xóa IP ${ip} của user ${username}?`)) return;
     try{
+      addLog('REQUEST /admin/allowip/remove', {username, ip});
       const res = await fetch(`${API_BASE}/admin/allowip/remove`, { 
         method: 'POST', 
         headers: {'content-type': 'application/json', authorization: `Bearer ${token}`}, 
         body: JSON.stringify({ username, ip }) 
       });
-      const j = await res.json().catch(()=>({}));
+      const raw = await res.text();
+      addLog('RESPONSE /admin/allowip/remove', `status ${res.status}: ${raw}`);
+      const j = (()=>{ try{return JSON.parse(raw);}catch(_){return {};}})();
       if(res.ok){
         setAdminMsg(`Đã xóa IP ${ip}`, true);
         adminLoadTable();
       }else{
-        setAdminMsg('Lỗi: ' + (j.error || res.status), false);
+        setAdminMsg('Lỗi: ' + (j.error || raw || res.status), false);
       }
     }catch(e){
       setAdminMsg('Lỗi: ' + e.message, false);
+      addLog('ERROR adminRemoveIpFromUser', e.message);
     }
   }
   
@@ -257,8 +303,33 @@
       const ipInput = document.getElementById(`ip-input-${username}`);
       if(ipInput) ipInput.value = ip;
       setAdminMsg(`Đã lấy IP: ${ip}`, true);
+      addLog('INFO my IP', ip);
     }catch{
       setAdminMsg('Không lấy được IP', false);
+    }
+  }
+
+  // Update password for a user
+  async function adminUpdatePassword(username){
+    const token = getBearer();
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
+    const input = document.getElementById(`pwd-${username}`);
+    const password = (input?.value||'').trim();
+    if(!password) return setAdminMsg('Nhập password mới', false);
+    try{
+      addLog('REQUEST /admin/users/update', {username});
+      const res = await fetch(`${API_BASE}/admin/users/update`, {
+        method: 'POST',
+        headers: {'content-type':'application/json', authorization:`Bearer ${token}`},
+        body: JSON.stringify({ username, password })
+      });
+      const raw = await res.text();
+      addLog('RESPONSE /admin/users/update', `status ${res.status}: ${raw}`);
+      if(res.ok){ setAdminMsg('Đã cập nhật mật khẩu', true); }
+      else { setAdminMsg('Cập nhật thất bại: ' + (raw||res.status), false); }
+    }catch(e){
+      setAdminMsg('Lỗi: ' + e.message, false);
+      addLog('ERROR adminUpdatePassword', e.message);
     }
   }
   </script>
@@ -325,6 +396,13 @@
           </tbody>
         </table>
       </div>
+    </div>
+
+    <!-- Debug log -->
+    <div class="card" style="margin-top:16px;">
+      <h2>🛠️ Debug</h2>
+      <p style="margin:0 0 8px 0;color:#94a3b8">Ghi lại request/response để kiểm tra vì sao không tải được.</p>
+      <pre id="debug-pre" style="white-space:pre-wrap;background:#0b1220;border:1px solid #1f2937;border-radius:8px;padding:12px;max-height:260px;overflow:auto;margin:0;"></pre>
     </div>
   </div>
 </body>
