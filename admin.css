@@ -12,7 +12,9 @@
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  /* Clean, solid background (no watermark) */
   background: var(--bg);
+  background-image: none !important;
   color: var(--text);
   line-height: 1.6;
   min-height: 100vh;

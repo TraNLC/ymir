@@ -41,9 +41,16 @@
   }
   requireAuth();
 
+  // Force remove any background watermark that might remain
+  try { document.addEventListener('DOMContentLoaded', function(){ document.body.style.backgroundImage = 'none'; }); } catch(_){}
+
   // ---- Admin panel helpers ----
   const API_BASE = AUTH_API;
-  function getAdminToken(){ return document.getElementById('adm-token').value.trim(); }
+  function getAdminToken(){
+    const inp = document.getElementById('adm-token');
+    const v = (inp && inp.value ? inp.value.trim() : '');
+    return v || (localStorage.getItem('ymir_admin_token')||'').trim();
+  }
   function setAdminMsg(msg, ok){ 
     const el=document.getElementById('adm-msg'); 
     if(el){ 
@@ -70,6 +77,66 @@
       setAdminMsg('Lỗi: ' + e.message, false);
     }
   }
+
+  // Load danh sách IP chờ duyệt
+  async function adminLoadPending(){
+    const token = getAdminToken();
+    const tbody = document.getElementById('pending-tbody');
+    if(!tbody) return;
+    if(!token){ tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nhập Admin Token trước</td></tr>'; return; }
+    try{
+      const res = await fetch(`${API_BASE}/admin/pending/list`, { headers: {'x-admin-token': token} });
+      if(!res.ok){ tbody.innerHTML = `<tr><td colspan="3" class=\"empty-state\">Lỗi: ${res.status}</td></tr>`; return; }
+      const data = await res.json();
+      renderPendingTable(data.pending || []);
+    }catch(e){
+      const tbody2 = document.getElementById('pending-tbody');
+      if(tbody2) tbody2.innerHTML = `<tr><td colspan="3" class=\"empty-state\">Lỗi: ${e.message}</td></tr>`;
+    }
+  }
+
+  function adminLoadAll(){
+    const inp = document.getElementById('adm-token');
+    if (inp) localStorage.setItem('ymir_admin_token', (inp.value||'').trim());
+    adminLoadTable();
+    adminLoadPending();
+  }
+
+  // Tự động nạp token đã lưu và tải danh sách khi vào trang
+  document.addEventListener('DOMContentLoaded', function(){
+    const inp = document.getElementById('adm-token');
+    const saved = localStorage.getItem('ymir_admin_token') || '';
+    if (inp && saved && !inp.value) inp.value = saved;
+    if (saved) { adminLoadAll(); }
+  });
+
+  // Load danh sách IP đang chờ duyệt
+  async function adminLoadPending(){
+    const token = getAdminToken();
+    if(!token) return;
+    try{
+      const res = await fetch(`${API_BASE}/admin/pending/list`, { headers: {'x-admin-token': token} });
+      if(!res.ok) return;
+      const data = await res.json();
+      renderPendingTable(data.pending || []);
+    }catch(_){ }
+  }
+
+  // Auto save token and auto load on page ready
+  document.addEventListener('DOMContentLoaded', function(){
+    const inp = document.getElementById('adm-token');
+    const saved = localStorage.getItem('ymir_admin_token') || '';
+    if (inp) {
+      if (saved && !inp.value) inp.value = saved;
+      inp.addEventListener('input', function(){
+        localStorage.setItem('ymir_admin_token', (inp.value||'').trim());
+      });
+      inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ adminLoadTable(); }});
+    }
+    // Auto load once
+    adminLoadTable();
+    adminLoadPending();
+  });
   
   // Render bảng admin
   function renderAdminTable(users){
@@ -101,6 +168,47 @@
         </tr>
       `;
     }).join('');
+  }
+
+  function renderPendingTable(pending){
+    const tbody = document.getElementById('pending-tbody');
+    if(!tbody) return;
+    if(!pending.length){
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Chưa có yêu cầu duyệt IP</td></tr>';
+      return;
+    }
+    tbody.innerHTML = pending.map(item => {
+      const ipTags = (item.ips||[]).map(ip => `<span class=\"ip-tag\">${ip}</span>`).join('');
+      const actions = (item.ips||[]).map(ip => `<button class=\"btn-primary\" onclick=\"adminApprovePending('${item.username}','${ip}')\">Duyệt ${ip}</button>`).join(' ');
+      return `
+        <tr>
+          <td style=\"font-weight: 600;\">${item.username}</td>
+          <td>${ipTags}</td>
+          <td>${actions}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function adminApprovePending(username, ip){
+    const token = getAdminToken();
+    if(!token) return setAdminMsg('Nhập Admin Token trước', false);
+    try{
+      const res = await fetch(`${API_BASE}/admin/pending/approve`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ username, ip })
+      });
+      if(res.ok){
+        setAdminMsg(`Đã duyệt IP ${ip} cho ${username}`, true);
+        adminLoadTable();
+        adminLoadPending();
+      } else {
+        setAdminMsg('Duyệt thất bại', false);
+      }
+    }catch(e){
+      setAdminMsg('Lỗi: ' + e.message, false);
+    }
   }
   
   // Thêm user vào danh sách quản lý
@@ -204,7 +312,7 @@
         <label>Admin Token</label>
         <div class="input-group">
           <input id="adm-token" type="password" placeholder="Nhập ADMIN_TOKEN">
-          <button class="btn-primary" onclick="adminLoadTable()">Tải danh sách</button>
+          <button class="btn-primary" onclick="adminLoadAll()">Tải danh sách</button>
         </div>
       </div>
 
@@ -236,6 +344,27 @@
       </div>
 
       <div id="adm-msg" class="admin-message"></div>
+    </div>
+
+    <!-- Pending IPs -->
+    <div class="card" style="margin-top:16px;">
+      <h2>🕑 IP chờ duyệt</h2>
+      <div class="table-wrapper">
+        <table id="pending-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>IP chờ duyệt</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="pending-tbody">
+            <tr>
+              <td colspan="3" class="empty-state">Chưa có yêu cầu duyệt IP</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </body>
