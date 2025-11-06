@@ -133,21 +133,23 @@
     }
     tbody.innerHTML = users.map(u => {
       const password = (u.password!==undefined && u.password!==null)? String(u.password) : '';
-      const status = u.deviceBound ? '<span style="color:#10b981">Đã login</span>' : '<span style="color:#94a3b8">Chưa login</span>';
+      const status = (u.activeSessions>0) ? '<span style="color:#10b981">Online</span>' : (u.deviceBound ? '<span style=\"color:#10b981\">Đã login</span>' : '<span style=\"color:#94a3b8\">Chưa login</span>');
+      const last = (u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : '-') + (u.lastLoginIp? `\\n${u.lastLoginIp}` : '');
       return `
         <tr>
-          <td style="font-weight: 600;">
-            <div>${u.username}</div>
-            <div style="margin-top:6px;color:#94a3b8;">
-              <span>Pass:</span>
-              <input type="text" id="pwd-${u.username}" value="${password.replace(/"/g,'&quot;')}" placeholder="(không có trong API)" style="width:180px;">
-              <button onclick="adminUpdatePassword('${u.username}')">Lưu</button>
-              <button style="margin-left:6px;color:#f87171;border-color:#f87171" onclick="adminDeleteUser('${u.username}')">Xóa user</button>
-            </div>
+          <td>
+            <input type="text" id="uname-${u.username}" value="${u.username.replace(/"/g,'&quot;')}" style="width:180px;">
+          </td>
+          <td>
+            <input type="text" id="pwd-${u.username}" value="${password.replace(/"/g,'&quot;')}" placeholder="(nhập để đổi)" style="width:180px;">
           </td>
           <td>${status}</td>
+          <td><pre style="margin:0;white-space:pre-wrap;color:#94a3b8">${last}</pre></td>
           <td>
-            
+            <button class="btn-primary" onclick="adminSaveUser('${u.username}')">Lưu</button>
+            <button style="margin-left:6px" onclick="adminLogoutAll('${u.username}')">Đăng xuất tất cả</button>
+            <button style="margin-left:6px" onclick="adminUnbind('${u.username}')">Gỡ khóa thiết bị</button>
+            <button style="margin-left:6px;color:#f87171;border-color:#f87171" onclick="adminDeleteUser('${u.username}')">Xóa</button>
           </td>
         </tr>
       `;
@@ -323,6 +325,85 @@
     }
   }
   
+  // Save (update password or rename user)
+  async function adminSaveUser(oldUsername){
+    const token = getBearer();
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
+    const newUsername = (document.getElementById(`uname-${oldUsername}`)?.value||'').trim();
+    const newPassword = (document.getElementById(`pwd-${oldUsername}`)?.value||'').trim();
+    if(!newUsername) return setAdminMsg('Nhập Username', false);
+    try{
+      if(newUsername !== oldUsername){
+        if(!newPassword) return setAdminMsg('Đổi username cần nhập password mới', false);
+        // create new then delete old
+        addLog('REQUEST rename:create', {newUsername});
+        let res = await fetch(`${API_BASE}/admin/users/create`, {
+          method: 'POST',
+          headers: {'content-type':'application/json', authorization:`Bearer ${token}`},
+          body: JSON.stringify({ username: newUsername, password: newPassword })
+        });
+        let raw = await res.text();
+        addLog('RESPONSE rename:create', `status ${res.status}: ${raw}`);
+        if(!res.ok) return setAdminMsg('Tạo user mới thất bại: ' + (raw||res.status), false);
+        addLog('REQUEST rename:delete', {oldUsername});
+        res = await fetch(`${API_BASE}/admin/users/delete`, {
+          method: 'POST', headers: {'content-type':'application/json', authorization:`Bearer ${token}`},
+          body: JSON.stringify({ username: oldUsername })
+        });
+        raw = await res.text();
+        addLog('RESPONSE rename:delete', `status ${res.status}: ${raw}`);
+        if(!res.ok) return setAdminMsg('Xóa user cũ thất bại: ' + (raw||res.status), false);
+        setAdminMsg('Đã đổi username', true);
+        adminLoadTable();
+        return;
+      }
+      // same username: only update password if provided
+      if(!newPassword){
+        setAdminMsg('Không có gì để lưu (chưa nhập password mới)', false);
+        return;
+      }
+      addLog('REQUEST /admin/users/update', {newUsername});
+      const res = await fetch(`${API_BASE}/admin/users/update`, {
+        method: 'POST', headers: {'content-type':'application/json', authorization:`Bearer ${token}`},
+        body: JSON.stringify({ username: newUsername, password: newPassword })
+      });
+      const raw = await res.text();
+      addLog('RESPONSE /admin/users/update', `status ${res.status}: ${raw}`);
+      if(res.ok){ setAdminMsg('Đã cập nhật mật khẩu', true); adminLoadTable(); }
+      else { setAdminMsg('Cập nhật thất bại: ' + (raw||res.status), false); }
+    }catch(e){
+      setAdminMsg('Lỗi: ' + e.message, false);
+      addLog('ERROR adminSaveUser', e.message);
+    }
+  }
+
+  // Logout all sessions
+  async function adminLogoutAll(username){
+    const token = getBearer();
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
+    try{
+      addLog('REQUEST /admin/users/logoutAll', {username});
+      const res = await fetch(`${API_BASE}/admin/users/logoutAll`, { method:'POST', headers:{'content-type':'application/json', authorization:`Bearer ${token}`}, body: JSON.stringify({ username }) });
+      const raw = await res.text();
+      addLog('RESPONSE /admin/users/logoutAll', `status ${res.status}: ${raw}`);
+      if(res.ok){ setAdminMsg('Đã đăng xuất tất cả phiên', true); adminLoadTable(); }
+      else setAdminMsg('Thất bại: ' + (raw||res.status), false);
+    }catch(e){ setAdminMsg('Lỗi: ' + e.message, false); addLog('ERROR adminLogoutAll', e.message); }
+  }
+
+  // Unbind device (fingerprint)
+  async function adminUnbind(username){
+    const token = getBearer();
+    if(!token) return setAdminMsg('Bạn cần đăng nhập admin', false);
+    try{
+      addLog('REQUEST /admin/users/unbind', {username});
+      const res = await fetch(`${API_BASE}/admin/users/unbind`, { method:'POST', headers:{'content-type':'application/json', authorization:`Bearer ${token}`}, body: JSON.stringify({ username }) });
+      const raw = await res.text();
+      addLog('RESPONSE /admin/users/unbind', `status ${res.status}: ${raw}`);
+      if(res.ok){ setAdminMsg('Đã gỡ khóa thiết bị', true); adminLoadTable(); }
+      else setAdminMsg('Thất bại: ' + (raw||res.status), false);
+    }catch(e){ setAdminMsg('Lỗi: ' + e.message, false); addLog('ERROR adminUnbind', e.message); }
+  }
   // Xóa user
   async function adminDeleteUser(username){
     const token = getBearer();
@@ -378,13 +459,15 @@
           <thead>
             <tr>
               <th>Username</th>
+              <th>Pass</th>
               <th>Trạng thái</th>
+              <th>Last login</th>
               <th>Thao tác</th>
             </tr>
           </thead>
           <tbody id="admin-ip-tbody">
             <tr>
-              <td colspan="3" class="empty-state">Nhấn "Tải danh sách" để xem users</td>
+              <td colspan="5" class="empty-state">Nhấn "Tải danh sách" để xem users</td>
             </tr>
           </tbody>
         </table>
